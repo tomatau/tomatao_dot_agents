@@ -1,0 +1,15 @@
+claude:
+  - dest: "~/.claude/CLAUDE.md"
+    target: dist/claude/CLAUDE.md
+
+codex:
+  - dest: "~/.codex/AGENTS.md"
+    target: dist/codex/AGENTS.md
+
+opencode:
+  - dest: "~/.config/opencode/AGENTS.md"
+    target: dist/opencode/AGENTS.md
+
+cursor:
+  - dest: "~/.cursor/rules/"
+    target: dist/cursor/rules/

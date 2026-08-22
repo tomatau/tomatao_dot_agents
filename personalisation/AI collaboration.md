@@ -1,0 +1,1 @@
+/Users/tomatao/Documents/obsidian/Tom's/tomatao/preferences/interaction-styles/AI collaboration.md
