@@ -1,18 +1,14 @@
-import { loadConfig } from "../lib/config";
+import { loadConfig } from "../settings/config";
 import type { HarnessAdapter } from "./types";
-import { claude } from "./claude";
-import { codex } from "./codex";
+import { aggregateAdapter } from "./aggregate";
 import { cursor } from "./cursor";
-import { opencode } from "./opencode";
-
-export const stubs = ["warp", "zed", "hermes"];
 
 export async function loadAdapters(): Promise<HarnessAdapter[]> {
   const config = await loadConfig();
   return [
-    claude(config.claude),
-    codex(config.codex),
-    opencode(config.opencode),
+    aggregateAdapter({ name: "claude", links: config.claude }),
+    aggregateAdapter({ name: "codex", links: config.codex }),
+    aggregateAdapter({ name: "opencode", links: config.opencode }),
     cursor(config.cursor),
   ];
 }

@@ -5,18 +5,22 @@ default:
 
 [group('sync')]
 render-personalisation:
-    bun src/sync/personalisation.ts render
+    bun src/entries/personalisation.ts render
 
 [group('sync')]
 link-personalisation:
-    bun src/sync/personalisation.ts link
+    bun src/entries/personalisation.ts link
 
 [group('sync')]
 sync-personalisation: render-personalisation link-personalisation
 
+[group('sync')]
+link-skills:
+    bun src/entries/skills.ts
+
 [group('health')]
 doctor:
-    bun src/doctor.ts
+    bun src/entries/doctor.ts
 
 [group('sync')]
-sync: sync-personalisation
+sync: sync-personalisation link-skills

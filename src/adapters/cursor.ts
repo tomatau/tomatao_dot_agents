@@ -1,13 +1,14 @@
 import { join } from "node:path";
-import type { HarnessAdapter, Link } from "./types";
-import type { AdapterLink } from "../lib/config";
-import { listSources } from "../lib/sources";
+import type { HarnessAdapter } from "./types";
+import type { Link } from "../lib/links";
+import type { AdapterLink } from "../settings/config";
+import { stripTrailingSlash } from "../lib/path";
+import { listSources } from "../domains/personalisation";
 
 export function cursor(links: AdapterLink[]): HarnessAdapter {
-  const dir = (path: string) => path.replace(/\/+$/, "");
   const pair = (link: AdapterLink, stem: string): Link => ({
-    dest: join(dir(link.dest), `${stem}.mdc`),
-    target: join(dir(link.target), `${stem}.mdc`),
+    dest: join(stripTrailingSlash(link.dest), `${stem}.mdc`),
+    target: join(stripTrailingSlash(link.target), `${stem}.mdc`),
   });
 
   return {

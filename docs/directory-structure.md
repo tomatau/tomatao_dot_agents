@@ -1,68 +1,47 @@
-# `~/.agents` — Directory Structure (end goal)
+# `~/.agents` — Directory Structure
 
-Coordination home for all agent harnesses on this machine: canonical shared data
-plus the code that distributes it. See [principles](principles.md) and
-[memory strategy](memory-strategy.md).
+What lives where. Root-level concerns only; operating details live in the
+topic docs ([personalisation](personalisation.md),
+[memory-strategy](memory-strategy.md)).
 
-**Status: planned.** Nothing here exists until built, phase by phase.
+**Built**: personalisation pipeline, skills sync. **Planned**: mcp, hindsight.
 
-## Source-of-truth map
-
-| Domain | Source of truth | Reaches consumers via |
-|---|---|---|
-| Personal facts & preferences | Obsidian vault (`~/Documents/obsidian/Tom's`) — sync scope declared at `_system/config/memory-sync.yml` | one-way sync → Hindsight `profile` bank |
-| Tooling & orchestration | dotfiles repo (`~/Code/tomatao/dotfiles`) | chezmoi |
-| Shared skills | `~/.agents/skills/` | adapter-managed symlinks/copies per harness |
-| Shared MCP servers | `~/.agents/mcp/` | adapter-managed merges into harness configs |
-| Stable personalisation | `~/.agents/personalisation/` | rendered into each harness's instructions mechanism |
-| Memory server runtime | Hindsight data (`~/.pg0`) | launchd job; native/hook/MCP bridges (see memory-strategy) |
-| Hermes-specific tooling | `hermes-gizmos` repo | Hermes' own mechanisms; never synced through here |
-| Project knowledge | each project repo (anywhere on disk) | read directly by agents; memory stores pointers only |
-
-## Layout
+## Tree
 
 ```
 ~/.agents/
 ├── README.md
-├── justfile                       # just sync / just hindsight status / just doctor …
-├── docs/                          # principles.md, directory-structure.md, memory-strategy.md
-├── src/                           # Bun + TypeScript
-│   ├── sync/
-│   │   ├── vault.ts               # reads vault whitelist → hindsight documents API
-│   │   ├── skills.ts
-│   │   ├── mcp.ts
-│   │   └── personalisation.ts
-│   ├── adapters/                  # per-harness paths/formats/merge logic only:
-│   │   ├── claude.ts codex.ts cursor.ts zed.ts opencode.ts warp.ts hermes.ts
-│   ├── hindsight.ts               # server lifecycle via launchctl wrapper
-│   └── doctor.ts                  # cross-cutting health checks
-├── skills/                        # CANONICAL shared skills (one dir per skill)
-├── mcp/                           # CANONICAL shared MCP registry
-├── personalisation/               # CANONICAL stable personalisation
-└── hindsight/                     # server runtime files
-    ├── hindsight.env              # provider/model/key, port, MCP instructions (secret)
-    ├── run-hindsight.sh           # tiny launcher (launchd can't source env files)
-    ├── com.hindsight.server.plist # RunAtLoad + KeepAlive
-    └── logs/                      # gitignored
+├── justfile                     # command map: just sync-personalisation, just doctor
+├── .prototools                  # toolchain pin (bun 1.3.13)
+├── package.json / tsconfig.json # Bun + TypeScript
+├── config/
+│   └── adapters.yml             # per-harness link paths (paths only, no behaviour)
+├── personalisation/             # CANONICAL personalisation sources
+│   └── *.md                     # symlinks into the vault, named after their source
+├── dist/                        # rendered output — committed so changes are reviewable
+│   ├── claude/  codex/  opencode/
+│   └── cursor/rules/*.mdc       # one rule file per source
+├── src/
+│   ├── lib/         # generic capability: symlink handling, path utils
+│   ├── settings/    # project environment: repo paths, yaml config
+│   ├── domains/     # feature knowledge (personalisation, skills)
+│   ├── adapters/    # per-harness content shaping
+│   └── entries/     # thin command entrypoints (justfile targets)
+├── docs/                        # these documents
+├── skills/                      # CANONICAL shared skills (<name>/SKILL.md)
+├── mcp/                         # (planned) CANONICAL shared MCP registry
+└── hindsight/                   # (planned) memory server runtime files
 ```
 
-Language: Bun/TypeScript — official `@vectorize-io/hindsight-client` SDK exists;
-everything else is HTTP + YAML. The server itself runs independently of this
-codebase via its own installer.
+## Root-level boundaries
 
-## Personalisation
-
-`personalisation/` holds durable identity and conventions — who the user is,
-communication style, standing constraints, tooling facts. Adapters render it into
-each harness's native mechanism (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`,
-Warp rules, Zed rules files, opencode rules …).
-
-There is no single emerging standard here yet: Claude Code has `CLAUDE.md`,
-several tools are converging on `AGENTS.md`, Hermes uses profiles, and bot-agent
-frameworks experiment with persona conventions like `soul.md`. Adapters absorb
-the differences; canonical content stays in one place here.
-
-It also carries the **memory directive** — every agent is told to recall before
-acting and retain durable learnings afterwards, so shared memory works by
-default without per-session instruction. Harnesses with hook support get true
-auto-memory instead.
+- **`src/` layers flow one way** — `entries` → `adapters`/`domains` →
+  `settings` → `lib`.
+- **`config/` declares paths; adapters declare behaviour.** The yaml never
+  contains logic or content details.
+- **`dist/` is generated but committed** — renders are human-readable and
+  diffing them beats trusting silent writes.
+- **`personalisation/` mirrors its vault sources by filename** — the vault note
+  is the source of truth; this dir holds only links to it.
+- Planned dirs follow the same pattern when they land: canonical data here,
+  merge/sync logic in `src/`, foreign configs never stored.

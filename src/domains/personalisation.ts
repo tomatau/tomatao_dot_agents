@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
-import { PERSONALISATION_DIR } from "./paths";
+import { PERSONALISATION_DIR } from "../settings/paths";
 
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n/;
 
@@ -27,5 +27,8 @@ export async function listSources(): Promise<SourceFile[]> {
 }
 
 export function aggregate(sources: SourceFile[]): string {
-  return `${sources.map((s) => s.content).join("\n\n").trimEnd()}\n`;
+  return `${sources
+    .map((s) => s.content)
+    .join("\n\n")
+    .trimEnd()}\n`;
 }
