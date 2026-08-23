@@ -1,7 +1,11 @@
-claude:
-  - dest: "~/.claude/skills/"
-    target: skills/
+links:
+  claude:
+    - dest: "~/.claude/skills/"
+      target: skills/
+  cursor:
+    - dest: "~/.cursor/skills/"
+      target: skills/
 
-cursor:
-  - dest: "~/.cursor/skills/"
-    target: skills/
+native:
+  - codex
+  - opencode

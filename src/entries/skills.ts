@@ -1,9 +1,9 @@
-import { loadConfig } from "../settings/config";
+import { loadSkillsConfig } from "../settings/config";
 import { ensureLinks } from "../lib/links";
 import { listSkills, planSkillLinks } from "../domains/skills";
 
 const skillPlan = planSkillLinks({
-  config: await loadConfig("skills.yml"),
+  config: (await loadSkillsConfig()).links,
   skills: await listSkills(),
 });
 

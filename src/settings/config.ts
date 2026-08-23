@@ -10,6 +10,13 @@ export interface AdapterLink {
 
 export type AdaptersConfig = Record<string, AdapterLink[]>;
 
+export interface SkillsConfig {
+  links: AdaptersConfig;
+  native: string[];
+}
+
+const CONFIG_DIR = join(REPO, "config");
+
 function resolvePath(path: string): string {
   if (path.startsWith("~")) return join(homedir(), path.slice(1));
   if (path.startsWith("/")) return path;
@@ -17,7 +24,7 @@ function resolvePath(path: string): string {
 }
 
 function resolveLinks(links?: AdapterLink[]): AdapterLink[] {
-  if (!links) throw new Error("adapter missing links in adapters.yml");
+  if (!links) throw new Error("adapter missing links");
   return links.map((l) => ({
     ...l,
     dest: resolvePath(l.dest),
@@ -25,10 +32,23 @@ function resolveLinks(links?: AdapterLink[]): AdapterLink[] {
   }));
 }
 
-export async function loadConfig(file = "adapters.yml"): Promise<AdaptersConfig> {
-  const raw = await readFile(join(REPO, "config", file), "utf8");
-  const parsed = Bun.YAML.parse(raw) as AdaptersConfig;
+async function readYaml(file: string): Promise<unknown> {
+  return Bun.YAML.parse(await readFile(join(CONFIG_DIR, file), "utf8"));
+}
+
+export async function loadAdaptersConfig(): Promise<AdaptersConfig> {
+  const parsed = (await readYaml("adapters.yml")) as AdaptersConfig;
   return Object.fromEntries(
     Object.entries(parsed).map(([name, links]) => [name, resolveLinks(links)]),
   );
+}
+
+export async function loadSkillsConfig(): Promise<SkillsConfig> {
+  const parsed = (await readYaml("skills.yml")) as Partial<SkillsConfig>;
+  return {
+    links: Object.fromEntries(
+      Object.entries(parsed.links ?? {}).map(([name, links]) => [name, resolveLinks(links)]),
+    ),
+    native: parsed.native ?? [],
+  };
 }

@@ -1,6 +1,6 @@
-import { readdir } from "node:fs/promises";
+import { access, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { REPO } from "../settings/paths";
+import { SKILLS_DIR } from "../settings/paths";
 import { stripTrailingSlash } from "../lib/path";
 import type { AdaptersConfig } from "../settings/config";
 
@@ -25,9 +25,31 @@ export function planSkillLinks({
 }
 
 export async function listSkills(): Promise<string[]> {
-  const entries = await readdir(join(REPO, "skills"), { withFileTypes: true });
+  const entries = await readdir(SKILLS_DIR, { withFileTypes: true });
   return entries
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
     .sort();
+}
+
+export type SkillState = "ok" | "missing-skill-md";
+
+export interface SkillCheck {
+  name: string;
+  path: string;
+  state: SkillState;
+}
+
+export async function inspectSkills(): Promise<SkillCheck[]> {
+  return Promise.all(
+    (await listSkills()).map(async (name) => {
+      const path = join(SKILLS_DIR, name, "SKILL.md");
+      try {
+        await access(path);
+        return { name, path, state: "ok" };
+      } catch {
+        return { name, path, state: "missing-skill-md" };
+      }
+    }),
+  );
 }
