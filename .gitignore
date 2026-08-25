@@ -1,4 +1,5 @@
 node_modules/
 hindsight/logs/
-personalisation/
+personalisation/*
+!personalisation/.gitkeep
 .DS_Store
