@@ -24,3 +24,7 @@ doctor:
 
 [group('sync')]
 sync: sync-personalisation link-skills
+
+[group('services')]
+hindsight *args:
+    bun src/entries/hindsight.ts {{args}}

@@ -1,5 +1,8 @@
 node_modules/
 hindsight/logs/
+hindsight/env.local
+hindsight/codex-home/
+hindsight/*.plist
 personalisation/*
 !personalisation/.gitkeep
 .DS_Store
