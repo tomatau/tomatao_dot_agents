@@ -16,3 +16,33 @@ export interface PersonalisationAdapter {
   render(sources: SourceFile[]): RenderedFile[]
   links(sources: SourceFile[]): Link[]
 }
+
+/** One MCP server to pin into a harness (an HTTP streamable endpoint). */
+export interface McpServer {
+  name: string
+  url: string
+}
+
+export type McpState =
+  | 'ok'
+  | 'added'
+  | 'updated'
+  | 'stale'
+  | 'missing'
+  | 'wrong-url'
+  | 'conflict'
+
+export interface McpRow {
+  name: string
+  server: string
+  state: McpState
+  detail: string
+}
+
+export interface McpAdapter {
+  name: string
+  /** Converge the harness's config so exactly `servers` are pinned. */
+  apply(servers: McpServer[]): Promise<McpRow[]>
+  /** Report the harness's current pins against `servers`, without writing. */
+  verify(servers: McpServer[]): Promise<McpRow[]>
+}

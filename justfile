@@ -29,6 +29,10 @@ sync: sync-personalisation link-skills
 sync-profile *args:
     bun src/entries/sync-profile.ts {{args}}
 
+[group('sync')]
+mcp *args:
+    bun src/entries/mcp.ts {{args}}
+
 [group('services')]
 hindsight *args:
     bun src/entries/hindsight.ts {{args}}

@@ -1,0 +1,5 @@
+banks:
+  - id: profile
+    access: read
+  - id: learnings
+    access: write

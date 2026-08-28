@@ -21,6 +21,19 @@ export async function loadVaultConfig(): Promise<VaultConfig> {
   return parsed
 }
 
+export interface BankConfig {
+  id: string
+  access: 'read' | 'write'
+}
+
+export interface HindsightConfig {
+  banks: BankConfig[]
+}
+
+export async function loadHindsightConfig(): Promise<HindsightConfig> {
+  return (await readYaml('hindsight.yml')) as HindsightConfig
+}
+
 export interface AdapterLink {
   dest: string
   target: string
@@ -31,7 +44,10 @@ export type HarnessLinks = Record<string, AdapterLink[]>
 
 /** Settings for pinning the hindsight bank MCP endpoints to a harness. */
 export interface HindsightMcpConfig {
+  /** claude: the `claude mcp` config scope (`user` by default). */
   scope?: string
+  /** codex: the CLI home to write to, overriding any inherited `CODEX_HOME`. */
+  home?: string
 }
 
 /** One harness's slice of `config/adapters.yml`. */
@@ -80,6 +96,10 @@ export async function loadAdaptersConfig(): Promise<AdaptersConfig> {
         skills: Array.isArray(cfg.skills)
           ? resolveLinks(cfg.skills)
           : cfg.skills,
+        hindsight_mcp: cfg.hindsight_mcp && {
+          ...cfg.hindsight_mcp,
+          home: cfg.hindsight_mcp.home && resolvePath(cfg.hindsight_mcp.home),
+        },
       },
     ]),
   )

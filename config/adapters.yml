@@ -5,12 +5,16 @@ claude:
   skills:
     - dest: '~/.claude/skills/'
       target: skills/
+  hindsight_mcp:
+    scope: user
 
 codex:
   personalisation:
     - dest: '~/.codex/AGENTS.md'
       target: dist/codex/AGENTS.md
   skills: native
+  hindsight_mcp:
+    home: '~/.codex'
 
 opencode:
   personalisation:
