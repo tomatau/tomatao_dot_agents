@@ -1,7 +1,7 @@
 # ~/.agents
 
 Coordination home for every agent harness on this machine. This repo owns the
-*shared* stuff: canonical data plus the code that distributes it. Tool-private
+_shared_ stuff: canonical data plus the code that distributes it. Tool-private
 configuration stays in each tool's own home.
 
 ## Quickstart
@@ -19,9 +19,9 @@ See [docs/directory-structure.md](docs/directory-structure.md).
 
 ## Docs
 
-| Doc | Covers |
-|---|---|
-| [principles](docs/principles.md) | the four rules everything here obeys |
-| [directory-structure](docs/directory-structure.md) | what lives where, built vs planned |
-| [personalisation](docs/personalisation.md) | how personalisation flows from Obsidian to each harness |
-| [memory-strategy](docs/memory-strategy.md) | shared agent memory plan (not yet built) |
+| Doc                                                | Covers                                                  |
+| -------------------------------------------------- | ------------------------------------------------------- |
+| [principles](docs/principles.md)                   | the four rules everything here obeys                    |
+| [directory-structure](docs/directory-structure.md) | what lives where, built vs planned                      |
+| [personalisation](docs/personalisation.md)         | how personalisation flows from Obsidian to each harness |
+| [memory-strategy](docs/memory-strategy.md)         | shared agent memory plan (not yet built)                |

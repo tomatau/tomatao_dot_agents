@@ -20,7 +20,7 @@ vault note (SoT)
 ## Conventions
 
 - **Filename drives identity**: for cursor (one rule per source), the source
-  filename becomes the rule filename *and* its `description:` frontmatter.
+  filename becomes the rule filename _and_ its `description:` frontmatter.
 - **Frontmatter is stripped** from sources before rendering — Obsidian
   properties are vault metadata, not agent instructions.
 - **Aggregating vs per-file adapters**: claude/codex/opencode fold all sources
@@ -35,13 +35,13 @@ Everything behavioural lives in `src/adapters/<harness>.ts`.
 
 ## Harness targets
 
-| Harness | Destination | Behaviour |
-|---|---|---|
-| claude | `~/.claude/CLAUDE.md` | aggregate |
-| codex | `~/.codex/AGENTS.md` | aggregate |
-| opencode | `~/.config/opencode/AGENTS.md` | aggregate |
-| cursor | `~/.cursor/rules/<name>.mdc` | 1:1 rules |
-| warp / zed / hermes | — | stubs, not implemented |
+| Harness             | Destination                    | Behaviour              |
+| ------------------- | ------------------------------ | ---------------------- |
+| claude              | `~/.claude/CLAUDE.md`          | aggregate              |
+| codex               | `~/.codex/AGENTS.md`           | aggregate              |
+| opencode            | `~/.config/opencode/AGENTS.md` | aggregate              |
+| cursor              | `~/.cursor/rules/<name>.mdc`   | 1:1 rules              |
+| warp / zed / hermes | —                              | stubs, not implemented |
 
 ## Commands
 

@@ -31,7 +31,6 @@ Deliver in ONE message:
 2. One plain-text diagram of the NEW code flow starting at that call site,
    inside a fenced code block. Never Mermaid or other markup — it must render
    readably in any terminal or agent. Draw a tree with box-drawing characters:
-
    - Root is the call site. Each node: `name  (file:line)` followed by a short
      annotation of its observable effect.
    - Encode whichever of these the code actually exhibits; omit categories the

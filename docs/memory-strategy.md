@@ -21,11 +21,11 @@ reaches it and how agents consume it.
 
 ## Banks
 
-| Bank | Written by | Read by | Purpose |
-|---|---|---|---|
-| `profile` | vault sync only | all agents (read-mostly) | authoritative personal context |
-| `learnings` | any agent, tagged `by:<agent>` + `review:*` + `kind:*` | all agents | cross-project ephemera: system quirks, constraints, environment facts; subject to external review, keepers graduate to the vault |
-| `project-<name>` | agents working in that repo | agents in that repo | evolving per-project understanding; pointers into the repo, never copies |
+| Bank             | Written by                                             | Read by                  | Purpose                                                                                                                          |
+| ---------------- | ------------------------------------------------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `profile`        | vault sync only                                        | all agents (read-mostly) | authoritative personal context                                                                                                   |
+| `learnings`      | any agent, tagged `by:<agent>` + `review:*` + `kind:*` | all agents               | cross-project ephemera: system quirks, constraints, environment facts; subject to external review, keepers graduate to the vault |
+| `project-<name>` | agents working in that repo                            | agents in that repo      | evolving per-project understanding; pointers into the repo, never copies                                                         |
 
 ### Learnings review conventions (application-level, not Hindsight-native)
 
@@ -72,15 +72,15 @@ only the reader. Vault location is machine-local and not checked in:
 version: 1
 
 defaults:
-  exclude:                          # never synced, applies under all sources
+  exclude: # never synced, applies under all sources
     - "**/.obsidian/**"
     - "**/.trash/**"
     - "**/_*/**"
-  promote_frontmatter: [category, scope, priority]  # keys → tags when present
+  promote_frontmatter: [category, scope, priority] # keys → tags when present
 
 sources:
-  - path: tomatao/preferences/coding/**/*.md       # globs only, vault-relative
-    tags: { category: coding }                     # applied to every match
+  - path: tomatao/preferences/coding/**/*.md # globs only, vault-relative
+    tags: { category: coding } # applied to every match
 ```
 
 Ratified semantics:
