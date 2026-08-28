@@ -3,6 +3,7 @@ hindsight/logs/
 hindsight/env.local
 hindsight/codex-home/
 hindsight/*.plist
+hindsight/.sync-cache.json
 personalisation/*
 !personalisation/.gitkeep
 .DS_Store

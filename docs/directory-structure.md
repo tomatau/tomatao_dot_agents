@@ -22,9 +22,10 @@ topic docs ([personalisation](personalisation.md),
 │   ├── claude/  codex/  opencode/
 │   └── cursor/rules/*.mdc       # one rule file per source
 ├── src/
-│   ├── lib/         # generic capability: symlink handling, path utils
+│   ├── lib/         # generic capability: frontmatter, hashing, path utils
+│   ├── clients/     # external services: hindsight API, launchd
 │   ├── settings/    # project environment: repo paths, yaml config
-│   ├── domains/     # feature knowledge (personalisation, skills)
+│   ├── domains/     # feature knowledge (personalisation, skills, vault-sync, hindsight)
 │   ├── adapters/    # per-harness content shaping
 │   └── entries/     # thin command entrypoints (justfile targets)
 ├── docs/                        # these documents
@@ -36,7 +37,7 @@ topic docs ([personalisation](personalisation.md),
 ## Root-level boundaries
 
 - **`src/` layers flow one way** — `entries` → `adapters`/`domains` →
-  `settings` → `lib`.
+  `clients` → `settings` → `lib`.
 - **`config/` declares paths; adapters declare behaviour.** The yaml never
   contains logic or content details.
 - **`dist/` is generated but committed** — renders are human-readable and

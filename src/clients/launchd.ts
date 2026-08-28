@@ -1,4 +1,5 @@
 import { homedir } from "node:os";
+import { hindsightApiUrl, hindsightInstalledPlist } from "../settings/paths";
 
 export async function bootout(label: string): Promise<void> {
   const uid = (await Bun.$`id -u`.text()).trim();
@@ -25,7 +26,6 @@ export async function status(label: string, plist: string): Promise<void> {
   const res = await Bun.$`launchctl print gui/${uid}/${label}`.quiet().nothrow();
   const prettyPlist = plist.replace(homedir(), "~");
   if (res.exitCode !== 0) {
-    const { hindsightInstalledPlist } = await import("../settings/paths");
     const installed = await Bun.file(hindsightInstalledPlist()).exists();
     if (installed) {
       console.log(`${label}: stopped`);
@@ -41,7 +41,7 @@ export async function status(label: string, plist: string): Promise<void> {
   const exitCode = out.match(/last exit code = ([^\n]+)/)?.[1]?.trim();
   const runs = out.match(/runs = (\d+)/)?.[1];
 
-  const apiUrl = process.env.HINDSIGHT_API_URL ?? "http://127.0.0.1:8888";
+  const apiUrl = hindsightApiUrl();
 
   const isRunning = state === "running";
   console.log(

@@ -1,7 +1,8 @@
 import { join } from "node:path";
-import { status } from "../lib/launchd";
+import { status } from "../clients/launchd";
 import { HINDSIGHT_LABEL, HINDSIGHT_LOG_FILE, HINDSIGHT_PLIST_REPO } from "../settings/paths";
-import { install, render, restart, start, stop, uninstall } from "../domains/hindsight";
+import { render } from "../domains/hindsight/plist";
+import { install, restart, start, stop, uninstall } from "../domains/hindsight/lifecycle";
 
 const cmd = process.argv[2] ?? "help";
 switch (cmd) {

@@ -3,6 +3,21 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { REPO } from "./paths";
 
+export function vaultDir(): string {
+  const dir = process.env.VAULT_DIR?.trim();
+  if (!dir) throw new Error("VAULT_DIR not set — add it to hindsight/env.local (see env.example)");
+  return dir;
+}
+
+export interface VaultConfig {
+  syncConfig: string;
+}
+
+export async function loadVaultConfig(): Promise<VaultConfig> {
+  const parsed = (await readYaml("vault.yml")) as VaultConfig;
+  return parsed;
+}
+
 export interface AdapterLink {
   dest: string;
   target: string;

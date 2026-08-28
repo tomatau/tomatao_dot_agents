@@ -25,6 +25,10 @@ doctor:
 [group('sync')]
 sync: sync-personalisation link-skills
 
+[group('sync')]
+sync-profile *args:
+    bun src/entries/sync-profile.ts {{args}}
+
 [group('services')]
 hindsight *args:
     bun src/entries/hindsight.ts {{args}}
