@@ -1,14 +1,18 @@
-import { loadAdaptersConfig } from "../settings/config";
-import type { HarnessAdapter } from "./types";
-import { aggregateAdapter } from "./aggregate";
-import { cursor } from "./cursor";
+import { loadAdaptersConfig } from '../settings/config'
+import { personalisation as claude } from './claude/personalisation'
+import { personalisation as codex } from './codex/personalisation'
+import { personalisation as cursor } from './cursor/personalisation'
+import { personalisation as opencode } from './opencode/personalisation'
+import type { PersonalisationAdapter } from './types'
 
-export async function loadAdapters(): Promise<HarnessAdapter[]> {
-  const config = await loadAdaptersConfig();
+export async function loadPersonalisationAdapters(): Promise<
+  PersonalisationAdapter[]
+> {
+  const config = await loadAdaptersConfig()
   return [
-    aggregateAdapter({ name: "claude", links: config.claude }),
-    aggregateAdapter({ name: "codex", links: config.codex }),
-    aggregateAdapter({ name: "opencode", links: config.opencode }),
-    cursor(config.cursor),
-  ];
+    claude(config.claude?.personalisation ?? []),
+    codex(config.codex?.personalisation ?? []),
+    opencode(config.opencode?.personalisation ?? []),
+    cursor(config.cursor?.personalisation ?? []),
+  ]
 }

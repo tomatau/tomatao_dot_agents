@@ -1,23 +1,17 @@
-import type { HarnessAdapter } from "./types";
-import type { AdapterLink } from "../settings/config";
-import { aggregate, listSources } from "../domains/personalisation";
+import type { AdapterLink } from '../settings/config'
+import { aggregate } from './render'
+import type { PersonalisationAdapter, SourceFile } from './types'
 
-// Renders all personalisation sources into one file per configured link.
-export function aggregateAdapter({
-  name,
-  links,
-}: {
-  name: string;
-  links: AdapterLink[];
-}): HarnessAdapter {
-  return {
+/** Personalisation adapter that folds every source into one document per link. */
+export function aggregateAdapter(name: string) {
+  return (links: AdapterLink[]): PersonalisationAdapter => ({
     name,
-    async render() {
-      const content = aggregate(await listSources());
-      return links.map((l) => ({ distPath: l.target, content }));
+    render(sources: SourceFile[]) {
+      const content = aggregate(sources)
+      return links.map(l => ({ distPath: l.target, content }))
     },
-    async links() {
-      return links;
+    links() {
+      return links
     },
-  };
+  })
 }

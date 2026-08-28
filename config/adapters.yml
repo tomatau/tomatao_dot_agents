@@ -1,15 +1,27 @@
 claude:
-  - dest: "~/.claude/CLAUDE.md"
-    target: dist/claude/CLAUDE.md
+  personalisation:
+    - dest: '~/.claude/CLAUDE.md'
+      target: dist/claude/CLAUDE.md
+  skills:
+    - dest: '~/.claude/skills/'
+      target: skills/
 
 codex:
-  - dest: "~/.codex/AGENTS.md"
-    target: dist/codex/AGENTS.md
+  personalisation:
+    - dest: '~/.codex/AGENTS.md'
+      target: dist/codex/AGENTS.md
+  skills: native
 
 opencode:
-  - dest: "~/.config/opencode/AGENTS.md"
-    target: dist/opencode/AGENTS.md
+  personalisation:
+    - dest: '~/.config/opencode/AGENTS.md'
+      target: dist/opencode/AGENTS.md
+  skills: native
 
 cursor:
-  - dest: "~/.cursor/rules/"
-    target: dist/cursor/rules/
+  personalisation:
+    - dest: '~/.cursor/rules/'
+      target: dist/cursor/rules/
+  skills:
+    - dest: '~/.cursor/skills/'
+      target: skills/
