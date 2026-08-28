@@ -23,7 +23,7 @@ doctor:
     bun src/entries/doctor.ts
 
 [group('sync')]
-sync: sync-personalisation link-skills
+sync: sync-personalisation link-skills mcp
 
 [group('sync')]
 sync-profile *args:

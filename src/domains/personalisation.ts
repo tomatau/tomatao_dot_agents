@@ -22,7 +22,7 @@ export async function listSources(): Promise<SourceFile[]> {
   return sources
 }
 
-export type SourceState = 'ok' | 'broken-link' | 'foreign-file'
+export type SourceState = 'ok' | 'local' | 'broken-link' | 'foreign-file'
 
 export interface SourceCheck {
   name: string
@@ -38,14 +38,17 @@ export async function inspectSources(): Promise<SourceCheck[]> {
   return Promise.all(
     files.map(async entry => {
       const path = join(PERSONALISATION_DIR, entry.name)
-      if (!entry.isSymbolicLink())
-        return { name: entry.name, path, state: 'foreign-file' }
-      try {
-        await stat(await readlink(path))
-        return { name: entry.name, path, state: 'ok' }
-      } catch {
-        return { name: entry.name, path, state: 'broken-link' }
+      if (entry.isSymbolicLink()) {
+        try {
+          await stat(await readlink(path))
+          return { name: entry.name, path, state: 'ok' }
+        } catch {
+          return { name: entry.name, path, state: 'broken-link' }
+        }
       }
+      // A real .md file checked into the repo is a deliberate local source.
+      if (entry.isFile()) return { name: entry.name, path, state: 'local' }
+      return { name: entry.name, path, state: 'foreign-file' }
     }),
   )
 }

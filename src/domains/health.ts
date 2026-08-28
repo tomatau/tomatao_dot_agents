@@ -1,9 +1,10 @@
-import { loadPersonalisationAdapters } from '../adapters/index'
+import { loadMcpAdapters, loadPersonalisationAdapters } from '../adapters/index'
 import { checkFreshness } from '../adapters/freshness'
-import { loadAdaptersConfig } from '../settings/config'
+import { loadAdaptersConfig, loadHindsightConfig } from '../settings/config'
 import { SKILLS_DIR, displayPath } from '../settings/paths'
 import { checkLinks } from '../lib/links'
 import type { Row, Section } from '../lib/report'
+import { bankServers } from './hindsight/mcp'
 import { inspectSources, listSources } from './personalisation'
 import {
   inspectSkills,
@@ -13,7 +14,7 @@ import {
   skillLinks,
 } from './skills'
 
-const PASS_STATES = new Set(['ok', 'fresh'])
+const PASS_STATES = new Set(['ok', 'fresh', 'local'])
 
 // Doctor must report on broken wiring, never crash because of it.
 async function section(
@@ -85,6 +86,21 @@ async function skillLinkRows(): Promise<Row[]> {
   return rows
 }
 
+// Read-only equivalent of `just mcp` — reports whether each opted-in harness has
+// the hindsight bank endpoints pinned, and flags stale `hindsight-*` pins.
+async function mcpPinRows(): Promise<Row[]> {
+  const adapters = await loadMcpAdapters()
+  if (adapters.length === 0) return []
+  const servers = bankServers(await loadHindsightConfig())
+  const rows: Row[] = []
+  for (const adapter of adapters) {
+    for (const r of await adapter.verify(servers)) {
+      rows.push({ name: adapter.name, state: r.state, detail: r.server })
+    }
+  }
+  return rows
+}
+
 function nativeSection(harnesses: string[]): Section {
   return {
     title: 'native skills',
@@ -106,6 +122,7 @@ export async function collectSections(): Promise<Section[]> {
       await section('renders (dist vs fresh render)', renderRows),
       await section('personalisation links', personalisationLinkRows),
       await section('skill links', skillLinkRows),
+      await section('mcp pins', mcpPinRows),
       nativeSection(nativeSkillHarnesses(await loadAdaptersConfig())),
     ]
       // drop sections with nothing to say
