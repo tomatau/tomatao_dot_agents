@@ -1,3 +1,3 @@
-import { aggregateAdapter } from "../aggregate";
+import { aggregateAdapter } from '../aggregate'
 
-export const personalisation = aggregateAdapter("opencode");
+export const personalisation = aggregateAdapter('opencode')

@@ -18,6 +18,12 @@ opencode:
       target: dist/opencode/AGENTS.md
   skills: native
 
+zed:
+  personalisation:
+    - dest: '~/.config/zed/AGENTS.md'
+      target: dist/zed/AGENTS.md
+  skills: native
+
 cursor:
   personalisation:
     - dest: '~/.cursor/rules/'

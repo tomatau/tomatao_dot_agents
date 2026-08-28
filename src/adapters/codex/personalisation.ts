@@ -1,3 +1,3 @@
-import { aggregateAdapter } from "../aggregate";
+import { aggregateAdapter } from '../aggregate'
 
-export const personalisation = aggregateAdapter("codex");
+export const personalisation = aggregateAdapter('codex')
