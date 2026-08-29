@@ -36,6 +36,13 @@ export async function putBank(bankId: string): Promise<void> {
   }
 }
 
+/** Create one bank if the server does not have it yet. */
+export async function ensureBank(id: string): Promise<boolean> {
+  if ((await listBankIds()).has(id)) return false
+  await putBank(id)
+  return true
+}
+
 export interface RetainItem {
   content: string
   document_id: string

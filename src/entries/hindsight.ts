@@ -6,7 +6,7 @@ import {
   HINDSIGHT_PLIST_REPO,
 } from '../settings/paths'
 import { render } from '../domains/hindsight/plist'
-import { ensureBanks } from '../domains/hindsight/banks'
+import { ensureBanks } from '../domains/shared-memory/banks'
 import {
   install,
   restart,

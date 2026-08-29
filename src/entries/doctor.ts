@@ -1,4 +1,4 @@
-import { collectSections } from '../domains/health'
+import { collectSections } from '../domains/health/report'
 import { printSection, tally } from '../lib/report'
 
 const sections = await collectSections()

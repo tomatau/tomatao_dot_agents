@@ -1,0 +1,8 @@
+# Memory shared across every repo: one MCP server per bank.
+#
+# `kind: shared-memory` expands the banks in config/hindsight.yml into servers
+# named `shared-memory-<bank>`, reached at that file's `url` plus the path below.
+kind: shared-memory
+
+# Per-bank endpoint path; `{bank}` is the bank id.
+path: /mcp/{bank}/

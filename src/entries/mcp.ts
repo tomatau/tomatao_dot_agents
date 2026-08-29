@@ -1,14 +1,11 @@
 import { loadMcpAdapters } from '../adapters/index'
-import {
-  loadSources,
-  managedNames,
-  recordPinned,
-  serversFor,
-} from '../domains/mcp'
+import { kinds } from '../domains/mcp/kinds'
+import { loadSources, serversFor } from '../domains/mcp/sources'
+import { managedNames, recordPinned } from '../domains/mcp/state'
 
 const dryRun = process.argv.includes('--dry-run')
 
-const sources = await loadSources()
+const sources = await loadSources(kinds)
 const managed = await managedNames(sources)
 const harnesses = await loadMcpAdapters()
 
@@ -29,7 +26,7 @@ for (const { adapter, enable } of harnesses) {
   for (const r of rows) {
     if (r.state === 'missing' || r.state === 'wrong-url') failures++
     console.log(
-      `${r.name.padEnd(9)}${r.state.padEnd(10)}${r.server.padEnd(20)}${r.detail}`,
+      `${r.name.padEnd(9)}${r.state.padEnd(10)}${r.server.padEnd(24)}${r.detail}`,
     )
   }
 }

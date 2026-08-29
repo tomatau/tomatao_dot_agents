@@ -1,0 +1,10 @@
+# Per-project memory: a stdio server routing to the bank for whichever repo the
+# harness is working in. It must be stdio — an HTTP pin is one shared process
+# with no per-caller context, so it cannot tell projects apart.
+#
+# It runs in other repos under their toolchain, so the endpoint is resolved here
+# and passed as arguments rather than read from config at run time.
+# See docs/project-memory.md.
+kind: project-memory
+command: bun
+path: /mcp/{bank}/

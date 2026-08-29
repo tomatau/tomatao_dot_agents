@@ -1,7 +1,11 @@
 import type { McpConfig } from '../../settings/config'
 import { cliMcpAdapter } from '../mcp-cli'
-import { type McpTransport, transportIdentity } from '../mcp-transport'
-import type { McpAdapter, McpServer } from '../types'
+import {
+  type McpTransport,
+  transportIdentity,
+  type McpServer,
+} from '../../lib/mcp'
+import type { McpAdapter } from '../types'
 
 // Claude Code owns its MCP config through the `claude mcp` CLI; we never edit
 // ~/.claude.json directly.
@@ -43,7 +47,15 @@ export function mcp(cfg: McpConfig): McpAdapter {
       const args =
         s.transport.kind === 'http'
           ? ['add', '-s', scope, '-t', 'http', s.name, s.transport.url]
-          : ['add', '-s', scope, s.name, '--', s.transport.command, ...s.transport.args]
+          : [
+              'add',
+              '-s',
+              scope,
+              s.name,
+              '--',
+              s.transport.command,
+              ...s.transport.args,
+            ]
       const res = await run(args)
       if (res.exitCode !== 0) {
         throw new Error(

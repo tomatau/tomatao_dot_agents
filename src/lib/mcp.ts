@@ -1,3 +1,9 @@
+/** One MCP server to pin into a harness. */
+export interface McpServer {
+  name: string
+  transport: McpTransport
+}
+
 /** How a harness reaches a server: an endpoint it calls, or a process it spawns. */
 export type McpTransport =
   | { kind: 'http'; url: string }
@@ -29,3 +35,14 @@ export function plainTransport(entry: unknown): McpTransport | undefined {
     return { kind: 'stdio', command: e.command, args: e.args ?? [] }
   return undefined
 }
+
+/**
+ * Turns one `mcp/<id>.yml` into the servers it describes. A resolver validates
+ * its own settings and throws naming the file, so a bad config fails before any
+ * harness is touched rather than pinning something wrong.
+ */
+export type McpResolver = (
+  id: string,
+  where: string,
+  raw: Record<string, unknown>,
+) => Promise<McpServer[]>

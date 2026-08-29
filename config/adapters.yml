@@ -7,7 +7,7 @@ claude:
       target: skills/
   mcp:
     scope: user
-    enable: [hindsight]
+    enable: [shared-memory, project-memory]
 
 codex:
   personalisation:
@@ -16,7 +16,7 @@ codex:
   skills: native
   mcp:
     home: '~/.codex'
-    enable: [hindsight]
+    enable: [shared-memory, project-memory]
 
 opencode:
   personalisation:
@@ -24,7 +24,7 @@ opencode:
       target: dist/opencode/AGENTS.md
   skills: native
   mcp:
-    enable: [hindsight]
+    enable: [shared-memory, project-memory]
 
 zed:
   personalisation:
@@ -32,7 +32,7 @@ zed:
       target: dist/zed/AGENTS.md
   skills: native
   mcp:
-    enable: [hindsight]
+    enable: [shared-memory, project-memory]
 
 cursor:
   personalisation:
@@ -42,4 +42,4 @@ cursor:
     - dest: '~/.cursor/skills/'
       target: skills/
   mcp:
-    enable: [hindsight]
+    enable: [shared-memory, project-memory]

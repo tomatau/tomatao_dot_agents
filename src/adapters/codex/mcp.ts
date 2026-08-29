@@ -1,7 +1,11 @@
 import type { McpConfig } from '../../settings/config'
 import { cliMcpAdapter } from '../mcp-cli'
-import { type McpTransport, transportIdentity } from '../mcp-transport'
-import type { McpAdapter, McpServer } from '../types'
+import {
+  type McpTransport,
+  type McpServer,
+  transportIdentity,
+} from '../../lib/mcp'
+import type { McpAdapter } from '../types'
 
 interface CodexServer {
   name: string

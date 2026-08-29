@@ -1,5 +1,6 @@
-import { transportIdentity } from './mcp-transport'
-import type { McpAdapter, McpRow, McpServer } from './types'
+import { transportIdentity } from '../lib/mcp'
+import type { McpAdapter, McpRow } from './types'
+import type { McpServer } from '../lib/mcp'
 
 /** The harness-specific half of a CLI-driven MCP adapter. */
 export interface CliMcp {
@@ -32,7 +33,7 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
     managed: Set<string>,
   ): string[] =>
     [...have.keys()].filter(
-      (n) => managed.has(n) && !desired.some((s) => s.name === n),
+      n => managed.has(n) && !desired.some(s => s.name === n),
     )
 
   return {
@@ -40,7 +41,7 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
 
     async verify(desired, managed) {
       const have = await cli.list()
-      const rows = desired.map((s) => {
+      const rows = desired.map(s => {
         const want = transportIdentity(s.transport)
         const found = have.get(s.name)
         return row(

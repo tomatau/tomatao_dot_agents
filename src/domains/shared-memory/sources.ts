@@ -1,6 +1,7 @@
-import type { McpServer } from '../../adapters/types'
+import type { McpResolver, McpServer } from '../../lib/mcp'
 import { requireString } from '../../lib/parse'
 import type { HindsightConfig } from '../../settings/config'
+import { loadHindsightConfig } from '../../settings/config'
 import { hindsightApiUrl } from '../../settings/paths'
 
 /** How an MCP client reaches a bank, from `mcp/<id>.yml`. */
@@ -30,7 +31,7 @@ export function bankServers(
   endpoint: BankEndpoint,
 ): McpServer[] {
   const base = hindsightApiUrl(hindsight.url)
-  return hindsight.banks.map((bank) => ({
+  return hindsight.banks.map(bank => ({
     name: `${id}-${bank.id}`,
     transport: {
       kind: 'http',
@@ -38,3 +39,7 @@ export function bankServers(
     },
   }))
 }
+
+/** One MCP server per configured bank, for the memory shared across all repos. */
+export const sharedMemorySource: McpResolver = async (id, where, raw) =>
+  bankServers(await loadHindsightConfig(), id, parseEndpoint(where, raw))

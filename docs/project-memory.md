@@ -3,57 +3,63 @@
 How a `project-*` bank (see [memory-strategy](memory-strategy.md)) reaches an
 agent automatically, in any repo, without per-repo setup.
 
-## Why not one pinned URL per project
+## Why a stdio server
 
 The bank pins are HTTP: one shared server, no per-caller context. It cannot tell
-which repo a request came from, so project scope would need a distinct URL pinned
-into each repo — opt-in, per harness, and impossible on codex (global config only).
+which repo a request came from, so project scope would otherwise need a distinct
+URL pinned into each repo — opt-in, per harness, and impossible on codex, which
+has no project-scoped config at all.
 
-A stdio server is spawned per session and inherits the harness's working
-directory, so it can identify the repo itself. Measured:
+A stdio server is spawned per session, so it can ask. Measured across harnesses:
 
-```
-claude   mcp list  in proj-a  →  cwd=…/proj-a
-opencode mcp list  in proj-b  →  cwd=…/proj-b
-```
+|                  | `roots`       | cwd          |
+| ---------------- | ------------- | ------------ |
+| claude, opencode | project root  | project root |
+| codex            | not supported | project root |
 
-That is what makes on-by-default possible; the tradeoff is a process we own.
+`roots` is the protocol's own mechanism and is preferred; cwd is the fallback
+that covers codex. The cost is a process per session, and one we maintain.
 
 ## Mechanism
 
 One stdio server pinned **once per harness at user scope**, alongside the HTTP
-bank pins. It adds no tools of its own — every JSON-RPC message is forwarded
-verbatim, so it stays a transport, not a second API to maintain.
+bank pins. It adds no tools of its own — every message is forwarded verbatim, so
+it stays a transport rather than a second API to keep in sync.
 
 ```text
 harness session (cwd = repo)
   └─ spawns bridge (stdio)
-      ├─ gitRoot(cwd)      repo identity, or exit quietly if not a repo
-      ├─ slug(root)        stable bank id
-      ├─ ensureBank(slug)  PUT /v1/default/banks/project-<slug> (idempotent)
-      ├─ register(slug)    records repo → bank in ~/.agents
-      └─ proxy(stdio↔HTTP) /mcp/project-<slug>/
+      ├─ bankId(cwd)         a first guess, always available
+      ├─ initialize          forwarded upstream, never synthesised
+      ├─ roots/list          asked only once the client is initialised
+      │   └─ bankId(root)    replaces the guess when it differs
+      ├─ ensureBank          created on first use
+      └─ forward(stdio↔HTTP) /mcp/project-<slug>/
 ```
+
+Two ordering rules make it correct. `initialize` is **forwarded**, so the client
+sees Hindsight's real capabilities and they cannot drift as it is upgraded —
+which in turn means the bank cannot be settled first, because a server may not
+request `roots/list` until the client is initialised. So requests arriving while
+roots is outstanding are **queued**, not answered against the guess; an
+unanswered `roots/list` falls back to cwd after five seconds rather than
+wedging the session.
 
 Consequences: every repo is covered without touching it; all harnesses resolve
 the same repo to the same bank; nothing is written into the target repo, so the
-commit-scope question does not arise.
+question of committing a pin does not arise.
 
 ## Bank identity
 
-Slug from the git remote where there is one, else the root directory name — the
-remote survives clones and directory renames, which a path does not. The registry
-it writes is a record, not the source of truth: losing it costs nothing because
-the slug is re-derived each session.
+Named after the git remote where there is one, else the root directory — the
+remote survives clones and directory renames, which a path does not. Outside a
+git repo the bridge exposes no tools rather than inventing a bank.
 
-Outside a git repo the bridge exposes nothing rather than inventing a bank.
+## Still open
 
-## Before building
-
-- cwd inheritance is confirmed on claude and opencode only. Codex, cursor, and
-  zed need the same check — codex especially, as it is the one harness with no
-  project-scoped config to fall back on.
-- Bank creation does not exist yet in this repo; `learnings` is pinned but was
-  never created. That step is shared with this design and should land first.
-- Unresolved: whether a repo can opt out, and whether `access:` should apply to
-  project banks as it does to the shared ones.
+- Whether a repo can opt out.
+- `access: read|write` is enforceable here — the bridge can filter write tools
+  out of `tools/list` — but only for traffic through it. The shared banks are
+  pinned as direct HTTP and would bypass it.
+- Cursor and zed are pinned but unverified live, both being GUI-only. If either
+  spawns servers outside the project, `roots` is what saves it.
