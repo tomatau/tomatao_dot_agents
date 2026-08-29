@@ -31,7 +31,7 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
     managed: Set<string>,
   ): string[] =>
     [...have.keys()].filter(
-      n => managed.has(n) && !desired.some(s => s.name === n),
+      (n) => managed.has(n) && !desired.some((s) => s.name === n),
     )
 
   return {
@@ -39,7 +39,7 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
 
     async verify(desired, managed) {
       const have = await cli.list()
-      const rows = desired.map(s => {
+      const rows = desired.map((s) => {
         const url = have.get(s.name)
         return row(
           s.name,

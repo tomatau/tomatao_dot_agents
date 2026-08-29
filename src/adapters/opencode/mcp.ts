@@ -11,7 +11,7 @@ export function mcp(_cfg: McpConfig): McpAdapter {
     name: 'opencode',
     file: join(homedir(), '.config/opencode/opencode.jsonc'),
     key: ['mcp'],
-    entry: s => ({ type: 'remote', url: s.url }),
-    urlOf: e => (e as { url?: string } | null)?.url,
+    entry: (s) => ({ type: 'remote', url: s.url }),
+    urlOf: (e) => (e as { url?: string } | null)?.url,
   })
 }

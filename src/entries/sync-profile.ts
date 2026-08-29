@@ -1,11 +1,11 @@
-import { syncProfile } from "../domains/vault-sync/sync";
+import { syncProfile } from '../domains/vault-sync/sync'
 
-const dryRun = process.argv.includes("--dry-run");
+const dryRun = process.argv.includes('--dry-run')
 
 try {
-  await syncProfile({ dryRun });
-  process.exit(0);
+  await syncProfile({ dryRun })
+  process.exit(0)
 } catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
+  console.error(error instanceof Error ? error.message : String(error))
+  process.exit(1)
 }

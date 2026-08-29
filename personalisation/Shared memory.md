@@ -4,6 +4,7 @@ tags:
   - about-me
   - memory
 ---
+
 # Shared memory
 
 I keep memory that outlives a single session in two Hindsight banks, reachable as

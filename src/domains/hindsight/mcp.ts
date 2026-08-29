@@ -30,7 +30,7 @@ export function bankServers(
   endpoint: BankEndpoint,
 ): McpServer[] {
   const base = hindsightApiUrl(hindsight.url)
-  return hindsight.banks.map(bank => ({
+  return hindsight.banks.map((bank) => ({
     name: `${id}-${bank.id}`,
     url: `${base}${endpoint.path.replaceAll(BANK, bank.id)}`,
   }))

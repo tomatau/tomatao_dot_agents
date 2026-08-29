@@ -84,7 +84,7 @@ function resolvePath(path: string): string {
 
 function resolveLinks(links?: AdapterLink[]): AdapterLink[] {
   if (!links) throw new Error('adapter missing links')
-  return links.map(l => ({
+  return links.map((l) => ({
     ...l,
     dest: resolvePath(l.dest),
     target: resolvePath(l.target),

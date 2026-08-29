@@ -27,7 +27,7 @@ async function section(
     return {
       title,
       rows,
-      failures: rows.filter(r => !PASS_STATES.has(r.state)).length,
+      failures: rows.filter((r) => !PASS_STATES.has(r.state)).length,
     }
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error)
@@ -36,11 +36,17 @@ async function section(
 }
 
 async function personalisationSourceRows(): Promise<Row[]> {
-  return (await inspectSources()).map(c => ({ state: c.state, detail: c.path }))
+  return (await inspectSources()).map((c) => ({
+    state: c.state,
+    detail: c.path,
+  }))
 }
 
 async function skillSourceRows(): Promise<Row[]> {
-  return (await inspectSkills()).map(c => ({ state: c.state, detail: c.path }))
+  return (await inspectSkills()).map((c) => ({
+    state: c.state,
+    detail: c.path,
+  }))
 }
 
 async function renderRows(): Promise<Row[]> {
@@ -106,13 +112,13 @@ async function mcpPinRows(): Promise<Row[]> {
 
 // A pin only works if the bank behind it exists, which config alone cannot show.
 async function bankRows(): Promise<Row[]> {
-  return (await inspectBanks()).map(b => ({ state: b.state, detail: b.id }))
+  return (await inspectBanks()).map((b) => ({ state: b.state, detail: b.id }))
 }
 
 function nativeSection(harnesses: string[]): Section {
   return {
     title: 'native skills',
-    rows: harnesses.map(name => ({
+    rows: harnesses.map((name) => ({
       name,
       state: 'native',
       detail: `${displayPath(SKILLS_DIR)} (discovered directly)`,
@@ -135,6 +141,6 @@ export async function collectSections(): Promise<Section[]> {
       nativeSection(nativeSkillHarnesses(await loadAdaptersConfig())),
     ]
       // drop sections with nothing to say
-      .filter(s => s.informational || s.rows.length > 0)
+      .filter((s) => s.informational || s.rows.length > 0)
   )
 }

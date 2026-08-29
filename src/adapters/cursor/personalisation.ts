@@ -14,8 +14,8 @@ export function personalisation(links: AdapterLink[]): PersonalisationAdapter {
   return {
     name: 'cursor',
     render(sources: SourceFile[]) {
-      return links.flatMap(l =>
-        sources.map(source => ({
+      return links.flatMap((l) =>
+        sources.map((source) => ({
           distPath: pair(l, source.name).target,
           content: [
             '---',
@@ -29,7 +29,7 @@ export function personalisation(links: AdapterLink[]): PersonalisationAdapter {
       )
     },
     links(sources: SourceFile[]) {
-      return links.flatMap(l => sources.map(s => pair(l, s.name)))
+      return links.flatMap((l) => sources.map((s) => pair(l, s.name)))
     },
   }
 }

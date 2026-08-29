@@ -11,7 +11,7 @@ export function mcp(_cfg: McpConfig): McpAdapter {
     name: 'zed',
     file: join(homedir(), '.config/zed/settings.json'),
     key: ['context_servers'],
-    entry: s => ({ url: s.url }),
-    urlOf: e => (e as { url?: string } | null)?.url,
+    entry: (s) => ({ url: s.url }),
+    urlOf: (e) => (e as { url?: string } | null)?.url,
   })
 }

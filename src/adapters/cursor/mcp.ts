@@ -10,7 +10,7 @@ export function mcp(_cfg: McpConfig): McpAdapter {
     name: 'cursor',
     file: join(homedir(), '.cursor/mcp.json'),
     key: ['mcpServers'],
-    entry: s => ({ url: s.url }),
-    urlOf: e => (e as { url?: string } | null)?.url,
+    entry: (s) => ({ url: s.url }),
+    urlOf: (e) => (e as { url?: string } | null)?.url,
   })
 }

@@ -8,7 +8,7 @@ export function aggregateAdapter(name: string) {
     name,
     render(sources: SourceFile[]) {
       const content = aggregate(sources)
-      return links.map(l => ({ distPath: l.target, content }))
+      return links.map((l) => ({ distPath: l.target, content }))
     },
     links() {
       return links

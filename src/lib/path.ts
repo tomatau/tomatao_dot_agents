@@ -1,3 +1,3 @@
 export function stripTrailingSlash(path: string): string {
-  return path.replace(/\/+$/, "");
+  return path.replace(/\/+$/, '')
 }

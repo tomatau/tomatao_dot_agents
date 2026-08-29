@@ -1,86 +1,103 @@
-import { loadHindsightConfig } from "../settings/config";
-import { hindsightApiUrl } from "../settings/paths";
+import { loadHindsightConfig } from '../settings/config'
+import { hindsightApiUrl } from '../settings/paths'
 
 // Read once: every call in a run resolves the same base URL.
-let base: Promise<string> | undefined;
+let base: Promise<string> | undefined
 
 async function apiUrl(path: string): Promise<string> {
-  base ??= loadHindsightConfig().then((c) => hindsightApiUrl(c.url));
-  return `${await base}${path}`;
+  base ??= loadHindsightConfig().then((c) => hindsightApiUrl(c.url))
+  return `${await base}${path}`
 }
 
 /** Bank ids the server currently holds. */
 export async function listBankIds(): Promise<Set<string>> {
-  const res = await fetch(await apiUrl("/v1/default/banks?limit=500"));
+  const res = await fetch(await apiUrl('/v1/default/banks?limit=500'))
   if (!res.ok) {
-    throw new Error(`list banks failed ${res.status}: ${await res.text()}`);
+    throw new Error(`list banks failed ${res.status}: ${await res.text()}`)
   }
-  const data = (await res.json()) as { banks: { bank_id: string }[] };
-  return new Set((data.banks ?? []).map((b) => b.bank_id));
+  const data = (await res.json()) as { banks: { bank_id: string }[] }
+  return new Set((data.banks ?? []).map((b) => b.bank_id))
 }
 
 /** Create a bank, or leave an existing one as it is. */
 export async function putBank(bankId: string): Promise<void> {
-  const res = await fetch(await apiUrl(`/v1/default/banks/${encodeURIComponent(bankId)}`), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: bankId }),
-  });
+  const res = await fetch(
+    await apiUrl(`/v1/default/banks/${encodeURIComponent(bankId)}`),
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: bankId }),
+    },
+  )
   if (!res.ok) {
-    throw new Error(`create bank ${bankId} failed ${res.status}: ${await res.text()}`);
+    throw new Error(
+      `create bank ${bankId} failed ${res.status}: ${await res.text()}`,
+    )
   }
 }
 
 export interface RetainItem {
-  content: string;
-  document_id: string;
-  tags?: string[];
-  update_mode?: "replace" | "append";
+  content: string
+  document_id: string
+  tags?: string[]
+  update_mode?: 'replace' | 'append'
 }
 
-export async function retainDocuments(bankId: string, items: RetainItem[]): Promise<void> {
-  if (items.length === 0) return;
-  const res = await fetch(await apiUrl(`/v1/default/banks/${encodeURIComponent(bankId)}/memories`), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items, async: false }),
-  });
+export async function retainDocuments(
+  bankId: string,
+  items: RetainItem[],
+): Promise<void> {
+  if (items.length === 0) return
+  const res = await fetch(
+    await apiUrl(`/v1/default/banks/${encodeURIComponent(bankId)}/memories`),
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, async: false }),
+    },
+  )
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`retain failed ${res.status}: ${text}`);
+    const text = await res.text()
+    throw new Error(`retain failed ${res.status}: ${text}`)
   }
 }
 
-export async function deleteDocument(bankId: string, documentId: string): Promise<void> {
+export async function deleteDocument(
+  bankId: string,
+  documentId: string,
+): Promise<void> {
   const res = await fetch(
     await apiUrl(
       `/v1/default/banks/${encodeURIComponent(bankId)}/documents/${encodeURIComponent(documentId)}`,
     ),
-    { method: "DELETE" },
-  );
+    { method: 'DELETE' },
+  )
   if (!res.ok && res.status !== 404) {
-    const text = await res.text();
-    throw new Error(`delete ${documentId} failed ${res.status}: ${text}`);
+    const text = await res.text()
+    throw new Error(`delete ${documentId} failed ${res.status}: ${text}`)
   }
 }
 
 /** Every document id currently held by a bank, following pagination to completion. */
 export async function listDocumentIds(bankId: string): Promise<string[]> {
-  const ids: string[] = [];
-  const limit = 500;
+  const ids: string[] = []
+  const limit = 500
   for (let offset = 0; ; offset += limit) {
     const res = await fetch(
       await apiUrl(
         `/v1/default/banks/${encodeURIComponent(bankId)}/documents?limit=${limit}&offset=${offset}`,
       ),
-    );
-    if (!res.ok) throw new Error(`list documents failed ${res.status}: ${await res.text()}`);
+    )
+    if (!res.ok)
+      throw new Error(
+        `list documents failed ${res.status}: ${await res.text()}`,
+      )
     const data = (await res.json()) as {
-      items: { id: string }[];
-      total: number;
-    };
-    for (const item of data.items ?? []) ids.push(item.id);
-    if (ids.length >= data.total || (data.items ?? []).length === 0) break;
+      items: { id: string }[]
+      total: number
+    }
+    for (const item of data.items ?? []) ids.push(item.id)
+    if (ids.length >= data.total || (data.items ?? []).length === 0) break
   }
-  return ids;
+  return ids
 }
