@@ -1,10 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import {
-  type McpTransport,
-  plainEntry,
-  plainTransport,
-  transportIdentity,
-} from './mcp'
+import type { McpTransport } from './mcp'
+import { plainEntry, plainTransport, transportIdentity } from './mcp'
 
 const http: McpTransport = { kind: 'http', url: 'http://127.0.0.1:8888/mcp/a/' }
 const stdio: McpTransport = {

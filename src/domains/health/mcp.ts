@@ -1,6 +1,7 @@
 import type { Row } from '../../lib/report'
+import type { McpSources } from '../mcp/sources'
 import { loadMcpAdapters } from '../../adapters/index'
-import { type McpSources, serversFor } from '../mcp/sources'
+import { serversFor } from '../mcp/sources'
 import { managedNames } from '../mcp/state'
 import { inspectBanks } from '../shared-memory/banks'
 

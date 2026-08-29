@@ -1,10 +1,7 @@
-import type { McpAdapter } from '../types'
-import {
-  type McpTransport,
-  transportIdentity,
-  type McpServer,
-} from '../../lib/mcp'
+import type { McpTransport, McpServer } from '../../lib/mcp'
 import type { McpConfig } from '../../settings/mcp'
+import type { McpAdapter } from '../types'
+import { transportIdentity } from '../../lib/mcp'
 import { mcpTarget } from '../../settings/mcp'
 import { cliMcpAdapter } from '../mcp-cli'
 

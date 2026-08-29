@@ -1,12 +1,10 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
+import type { McpTransport, McpServer } from '../lib/mcp'
 import type { McpAdapter } from './types'
-import { applyEdits, modify, type ParseError, parse } from 'jsonc-parser'
-import {
-  type McpTransport,
-  type McpServer,
-  transportIdentity,
-} from '../lib/mcp'
+import type { ParseError } from 'jsonc-parser'
+import { applyEdits, modify, parse } from 'jsonc-parser'
+import { transportIdentity } from '../lib/mcp'
 import { cliMcpAdapter } from './mcp-cli'
 
 /** The harness-specific half of a JSON/JSONC-file MCP adapter. */

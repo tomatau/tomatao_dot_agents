@@ -1,7 +1,7 @@
 import { access, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import type { AdaptersConfig, HarnessLinks } from '../settings/adapters'
 import { stripTrailingSlash } from '../lib/path'
-import { type AdaptersConfig, type HarnessLinks } from '../settings/adapters'
 import { SKILLS_DIR } from '../settings/paths'
 
 /** Harnesses that mirror `skills/`, mapped to their base link. */

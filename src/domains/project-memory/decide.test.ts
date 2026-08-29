@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
+import type { Action, Event, Session } from './protocol'
 import { step } from './decide'
-import { type Action, type Event, type Session, newSession } from './protocol'
+import { newSession } from './protocol'
 
 const THIS_REPO = 'project-here'
 const OTHER_REPO = 'project-there'

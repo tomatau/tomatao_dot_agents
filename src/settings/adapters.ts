@@ -1,5 +1,6 @@
+import type { McpConfig } from './mcp'
 import { asRecord, requireString } from '../lib/parse'
-import { type McpConfig, parseMcpConfig } from './mcp'
+import { parseMcpConfig } from './mcp'
 import { ADAPTERS_YML, configWhere, readConfigYaml, resolvePath } from './yaml'
 
 const WHERE = configWhere(ADAPTERS_YML)

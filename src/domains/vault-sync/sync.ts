@@ -1,8 +1,8 @@
+import type { RetainItem } from '../../clients/hindsight/documents'
 import type { VaultDocument } from './types'
 import {
   deleteDocument,
   listDocumentIds,
-  type RetainItem,
   retainDocuments,
 } from '../../clients/hindsight/documents'
 import { planSync, saveCache } from './cache'

@@ -1,18 +1,15 @@
+import type { JsonRpc } from '../clients/mcp-http'
+import type { Event, Session } from '../domains/project-memory/protocol'
 // A stdio MCP server routing to the memory bank of whichever repo the harness is
 // working in. It must be stdio: an HTTP pin is one shared process with no
 // per-caller context, so it cannot tell projects apart. Messages are forwarded
 // verbatim, keeping this a transport rather than a second API. The decisions live
 // in domains/hindsight/bridge.ts; see docs/project-memory.md.
-import { McpUpstream, type JsonRpc } from '../clients/mcp-http'
+import { McpUpstream } from '../clients/mcp-http'
 import { step } from '../domains/project-memory/decide'
 import { perform } from '../domains/project-memory/effects'
 import { projectBankId, rootBankId } from '../domains/project-memory/identity'
-import {
-  type Event,
-  type Session,
-  internalError,
-  newSession,
-} from '../domains/project-memory/protocol'
+import { internalError, newSession } from '../domains/project-memory/protocol'
 import { fileLogger } from '../lib/log'
 import { BRIDGE_LOG_FILE } from '../settings/paths'
 

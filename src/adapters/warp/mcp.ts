@@ -1,7 +1,8 @@
-import { plainEntry, plainTransport } from '../../lib/mcp'
-import { type McpConfig, mcpTarget } from '../../settings/mcp'
-import { jsonMcpAdapter } from '../json-mcp'
+import type { McpConfig } from '../../settings/mcp'
 import type { McpAdapter } from '../types'
+import { plainEntry, plainTransport } from '../../lib/mcp'
+import { mcpTarget } from '../../settings/mcp'
+import { jsonMcpAdapter } from '../json-mcp'
 
 // Warp has no MCP CLI and keeps its own servers in Warp Drive, but it also reads
 // the `.mcp.json` convention. We converge its own copy under `~/.warp/` rather
@@ -12,7 +13,7 @@ export function mcp(cfg: McpConfig): McpAdapter {
     name: 'warp',
     file: mcpTarget('warp', cfg, 'file'),
     key: ['mcpServers'],
-    entry: (s) => plainEntry(s.transport),
+    entry: s => plainEntry(s.transport),
     transportOf: plainTransport,
   })
 }

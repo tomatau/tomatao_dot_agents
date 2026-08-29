@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { type McpConfig, mcpTarget, parseMcpConfig } from './mcp'
+import type { McpConfig } from './mcp'
+import { mcpTarget, parseMcpConfig } from './mcp'
 
 const NEEDS_ONE =
   'config/adapters.yml: cursor mcp needs exactly one of `scope`, `home`, or `file`'
