@@ -56,5 +56,5 @@ Dependencies flow one way — `entries` → `adapters`/`domains` → `clients` �
   harness-shaped out — a domain's vocabulary appearing here is a design smell.
 - **`entries/`** parses arguments and prints results, one per command. Logic
   that grows here has a home one layer down — with one exception: composition.
-  A registry naming every provider of something points *at* those providers, so
+  A registry naming every provider of something points _at_ those providers, so
   it can only sit above them; a shared file here is its home, not a domain.

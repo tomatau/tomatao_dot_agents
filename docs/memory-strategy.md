@@ -16,8 +16,9 @@ reaches it and how agents consume it.
 2. **Hook-based auto-memory** — recall injected before prompts, turns retained
    automatically; doesn't rely on the agent choosing to call tools. Evaluate and
    adopt per harness where supported (wired via `hindsight-coding-agents` where applicable).
-3. **MCP fallback** — universal baseline: pinned HTTP endpoints `/mcp/<bank>/`
-   exposed to every harness identically.
+3. **MCP fallback** — universal baseline: the shared banks as pinned HTTP
+   endpoints `/mcp/<bank>/`, and per-project memory as a stdio server, exposed
+   to every harness identically.
 
 ## Banks
 
@@ -58,7 +59,8 @@ not whether you have approved it. These conventions sit on top:
 ## Connections per agent
 
 - Pinned globally: `/mcp/profile/` (read-mostly) and `/mcp/learnings/`.
-- `project-*` banks attach per-repo (repo-level config names its bank).
+- `project-*` banks are reached through a stdio bridge that identifies the repo
+  itself, so a repo needs no config of its own; see [project-memory](project-memory.md).
 - Hermes uses its native integration against the same banks.
 
 ## Vault → profile sync contract (ratified)
