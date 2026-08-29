@@ -1,0 +1,8 @@
+# Hindsight memory banks, one MCP server per bank.
+#
+# `kind: hindsight` expands the banks in config/hindsight.yml into servers named
+# `hindsight-<bank>`, reached at that file's `url` plus the path below.
+kind: hindsight
+
+# Per-bank endpoint path; `{bank}` is the bank id.
+path: /mcp/{bank}/

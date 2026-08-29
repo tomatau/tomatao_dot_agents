@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { requireUrl } from '../lib/parse'
 import { REPO } from './paths'
 
 export function vaultDir(): string {
@@ -27,11 +28,22 @@ export interface BankConfig {
 }
 
 export interface HindsightConfig {
+  /** Server base URL; the `HINDSIGHT_API_*` env vars override it. */
+  url: string
   banks: BankConfig[]
 }
 
 export async function loadHindsightConfig(): Promise<HindsightConfig> {
-  return (await readYaml('hindsight.yml')) as HindsightConfig
+  const where = 'config/hindsight.yml'
+  const raw = ((await readYaml('hindsight.yml')) ?? {}) as Record<
+    string,
+    unknown
+  >
+  const banks = raw.banks
+  if (!Array.isArray(banks) || banks.length === 0) {
+    throw new Error(`${where}: \`banks\` must list at least one bank`)
+  }
+  return { url: requireUrl(where, raw, 'url'), banks: banks as BankConfig[] }
 }
 
 export interface AdapterLink {
@@ -42,8 +54,10 @@ export interface AdapterLink {
 /** `harness -> link list`, the shape the skill-link planner works over. */
 export type HarnessLinks = Record<string, AdapterLink[]>
 
-/** Settings for pinning the hindsight bank MCP endpoints to a harness. */
-export interface HindsightMcpConfig {
+/** Settings for pinning MCP servers into one harness. */
+export interface McpConfig {
+  /** Ids of the MCP sources to pin here; see `src/domains/mcp.ts`. */
+  enable?: string[]
   /** claude: the `claude mcp` config scope (`user` by default). */
   scope?: string
   /** codex: the CLI home to write to, overriding any inherited `CODEX_HOME`. */
@@ -55,7 +69,7 @@ export interface HarnessConfig {
   personalisation?: AdapterLink[]
   /** Link list to mirror `skills/` into, or `"native"` when the harness discovers them directly. */
   skills?: AdapterLink[] | 'native'
-  hindsight_mcp?: HindsightMcpConfig
+  mcp?: McpConfig
 }
 
 export type AdaptersConfig = Record<string, HarnessConfig>
@@ -96,9 +110,9 @@ export async function loadAdaptersConfig(): Promise<AdaptersConfig> {
         skills: Array.isArray(cfg.skills)
           ? resolveLinks(cfg.skills)
           : cfg.skills,
-        hindsight_mcp: cfg.hindsight_mcp && {
-          ...cfg.hindsight_mcp,
-          home: cfg.hindsight_mcp.home && resolvePath(cfg.hindsight_mcp.home),
+        mcp: cfg.mcp && {
+          ...cfg.mcp,
+          home: cfg.mcp.home && resolvePath(cfg.mcp.home),
         },
       },
     ]),

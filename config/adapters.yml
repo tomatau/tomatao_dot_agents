@@ -5,28 +5,34 @@ claude:
   skills:
     - dest: '~/.claude/skills/'
       target: skills/
-  hindsight_mcp:
+  mcp:
     scope: user
+    enable: [hindsight]
 
 codex:
   personalisation:
     - dest: '~/.codex/AGENTS.md'
       target: dist/codex/AGENTS.md
   skills: native
-  hindsight_mcp:
+  mcp:
     home: '~/.codex'
+    enable: [hindsight]
 
 opencode:
   personalisation:
     - dest: '~/.config/opencode/AGENTS.md'
       target: dist/opencode/AGENTS.md
   skills: native
+  mcp:
+    enable: [hindsight]
 
 zed:
   personalisation:
     - dest: '~/.config/zed/AGENTS.md'
       target: dist/zed/AGENTS.md
   skills: native
+  mcp:
+    enable: [hindsight]
 
 cursor:
   personalisation:
@@ -35,3 +41,5 @@ cursor:
   skills:
     - dest: '~/.cursor/skills/'
       target: skills/
+  mcp:
+    enable: [hindsight]

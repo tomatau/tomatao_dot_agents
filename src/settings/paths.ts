@@ -4,6 +4,7 @@ import { join } from "node:path";
 export const REPO = join(import.meta.dir, "..", "..");
 export const PERSONALISATION_DIR = join(REPO, "personalisation");
 export const SKILLS_DIR = join(REPO, "skills");
+export const MCP_DIR = join(REPO, "mcp");
 
 export const HINDSIGHT_DIR = join(REPO, "hindsight");
 export const HINDSIGHT_ENV_LOCAL = join(HINDSIGHT_DIR, "env.local");
@@ -19,13 +20,20 @@ export function hindsightInstalledPlist(): string {
   return join(homedir(), "Library/LaunchAgents", HINDSIGHT_PLIST_NAME);
 }
 
-/** Hindsight API base URL: `HINDSIGHT_API_URL`, else `HINDSIGHT_API_HOST`/`_PORT`, else localhost. */
-export function hindsightApiUrl(): string {
+/**
+ * Hindsight API base URL: `HINDSIGHT_API_URL`, else `HINDSIGHT_API_HOST`/`_PORT`,
+ * else the `url` from config/hindsight.yml that the caller passes in.
+ */
+export function hindsightApiUrl(configured: string): string {
   const explicit = process.env.HINDSIGHT_API_URL?.trim();
   if (explicit) return explicit.replace(/\/$/, "");
-  const host = process.env.HINDSIGHT_API_HOST?.trim() || "127.0.0.1";
-  const port = process.env.HINDSIGHT_API_PORT?.trim() || "8888";
-  return `http://${host}:${port}`;
+  // A half-set env overrides only its half; the rest comes from `configured`.
+  const base = new URL(configured);
+  const host = process.env.HINDSIGHT_API_HOST?.trim();
+  const port = process.env.HINDSIGHT_API_PORT?.trim();
+  if (host) base.hostname = host;
+  if (port) base.port = port;
+  return base.origin;
 }
 
 export function displayPath(path: string): string {

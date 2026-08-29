@@ -1,7 +1,12 @@
+import { loadHindsightConfig } from "../settings/config";
 import { hindsightApiUrl } from "../settings/paths";
 
-function apiUrl(path: string): string {
-  return `${hindsightApiUrl()}${path}`;
+// Read once: every call in a run resolves the same base URL.
+let base: Promise<string> | undefined;
+
+async function apiUrl(path: string): Promise<string> {
+  base ??= loadHindsightConfig().then((c) => hindsightApiUrl(c.url));
+  return `${await base}${path}`;
 }
 
 export interface RetainItem {
@@ -13,7 +18,7 @@ export interface RetainItem {
 
 export async function retainDocuments(bankId: string, items: RetainItem[]): Promise<void> {
   if (items.length === 0) return;
-  const res = await fetch(apiUrl(`/v1/default/banks/${encodeURIComponent(bankId)}/memories`), {
+  const res = await fetch(await apiUrl(`/v1/default/banks/${encodeURIComponent(bankId)}/memories`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ items, async: false }),
@@ -26,7 +31,7 @@ export async function retainDocuments(bankId: string, items: RetainItem[]): Prom
 
 export async function deleteDocument(bankId: string, documentId: string): Promise<void> {
   const res = await fetch(
-    apiUrl(
+    await apiUrl(
       `/v1/default/banks/${encodeURIComponent(bankId)}/documents/${encodeURIComponent(documentId)}`,
     ),
     { method: "DELETE" },
@@ -43,7 +48,7 @@ export async function listDocumentIds(bankId: string): Promise<string[]> {
   const limit = 500;
   for (let offset = 0; ; offset += limit) {
     const res = await fetch(
-      apiUrl(
+      await apiUrl(
         `/v1/default/banks/${encodeURIComponent(bankId)}/documents?limit=${limit}&offset=${offset}`,
       ),
     );

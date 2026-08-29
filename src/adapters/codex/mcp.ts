@@ -1,4 +1,4 @@
-import type { HindsightMcpConfig } from '../../settings/config'
+import type { McpConfig } from '../../settings/config'
 import { cliMcpAdapter } from '../mcp-cli'
 import type { McpAdapter, McpServer } from '../types'
 
@@ -8,9 +8,9 @@ interface CodexServer {
 }
 
 // Codex owns its MCP config through the `codex mcp` CLI (writes <CODEX_HOME>/config.toml).
-// `home` from adapters.yml pins CODEX_HOME so the repo's direnv-injected value (the
-// Hindsight server's isolated auth dir) can't misdirect the write.
-export function mcp(cfg: HindsightMcpConfig): McpAdapter {
+// `home` from adapters.yml pins CODEX_HOME so a direnv-injected value (this repo
+// sets one for an isolated auth dir) can't misdirect the write.
+export function mcp(cfg: McpConfig): McpAdapter {
   const env = cfg.home ? { ...process.env, CODEX_HOME: cfg.home } : undefined
   const run = (args: string[]) => {
     const cmd = Bun.$`codex mcp ${args}`.quiet().nothrow()

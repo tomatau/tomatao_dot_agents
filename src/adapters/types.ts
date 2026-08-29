@@ -39,10 +39,14 @@ export interface McpRow {
   detail: string
 }
 
+/**
+ * Converges one harness's MCP config. `managed` names every server this repo
+ * owns; anything pinned outside that set is the user's and is left alone.
+ */
 export interface McpAdapter {
   name: string
-  /** Converge the harness's config so exactly `servers` are pinned. */
-  apply(servers: McpServer[]): Promise<McpRow[]>
-  /** Report the harness's current pins against `servers`, without writing. */
-  verify(servers: McpServer[]): Promise<McpRow[]>
+  /** Converge the harness so exactly `desired` of the `managed` names are pinned. */
+  apply(desired: McpServer[], managed: Set<string>): Promise<McpRow[]>
+  /** Report the harness's current pins against `desired`, without writing. */
+  verify(desired: McpServer[], managed: Set<string>): Promise<McpRow[]>
 }

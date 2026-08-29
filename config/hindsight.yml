@@ -1,3 +1,8 @@
+# The hindsight memory service: where it runs, and the banks it holds.
+# The HINDSIGHT_API_URL / HINDSIGHT_API_HOST / HINDSIGHT_API_PORT env vars
+# override `url` (see hindsight/env.local).
+url: http://127.0.0.1:8888
+
 banks:
   - id: profile
     access: read

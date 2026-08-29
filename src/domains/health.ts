@@ -1,10 +1,10 @@
 import { loadMcpAdapters, loadPersonalisationAdapters } from '../adapters/index'
 import { checkFreshness } from '../adapters/freshness'
-import { loadAdaptersConfig, loadHindsightConfig } from '../settings/config'
+import { loadAdaptersConfig } from '../settings/config'
 import { SKILLS_DIR, displayPath } from '../settings/paths'
 import { checkLinks } from '../lib/links'
 import type { Row, Section } from '../lib/report'
-import { bankServers } from './hindsight/mcp'
+import { loadSources, managedNames, serversFor } from './mcp'
 import { inspectSources, listSources } from './personalisation'
 import {
   inspectSkills,
@@ -87,14 +87,16 @@ async function skillLinkRows(): Promise<Row[]> {
 }
 
 // Read-only equivalent of `just mcp` — reports whether each opted-in harness has
-// the hindsight bank endpoints pinned, and flags stale `hindsight-*` pins.
+// the servers it enables pinned, and flags managed pins it no longer wants.
 async function mcpPinRows(): Promise<Row[]> {
-  const adapters = await loadMcpAdapters()
-  if (adapters.length === 0) return []
-  const servers = bankServers(await loadHindsightConfig())
+  const harnesses = await loadMcpAdapters()
+  if (harnesses.length === 0) return []
+  const sources = await loadSources()
+  const managed = managedNames(sources)
   const rows: Row[] = []
-  for (const adapter of adapters) {
-    for (const r of await adapter.verify(servers)) {
+  for (const { adapter, enable } of harnesses) {
+    const desired = serversFor(sources, enable)
+    for (const r of await adapter.verify(desired, managed)) {
       rows.push({ name: adapter.name, state: r.state, detail: r.server })
     }
   }

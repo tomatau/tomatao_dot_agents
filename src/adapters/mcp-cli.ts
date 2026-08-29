@@ -1,12 +1,9 @@
 import type { McpAdapter, McpRow, McpServer } from './types'
 
-// Only servers under this prefix are ours to manage in a harness's config.
-const PREFIX = 'hindsight-'
-
 /** The harness-specific half of a CLI-driven MCP adapter. */
 export interface CliMcp {
   name: string
-  /** Currently pinned `hindsight-*` servers, as `name -> url`. */
+  /** Every remote server the harness has pinned, as `name -> url`. */
   list(): Promise<Map<string, string>>
   /** Pin a server; throw on failure. */
   add(server: McpServer): Promise<void>
@@ -27,17 +24,22 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
     detail,
   })
 
-  const staleNames = (have: Map<string, string>, want: McpServer[]): string[] =>
+  // Pinned, ours to manage, but no longer wanted here.
+  const staleNames = (
+    have: Map<string, string>,
+    desired: McpServer[],
+    managed: Set<string>,
+  ): string[] =>
     [...have.keys()].filter(
-      n => n.startsWith(PREFIX) && !want.some(s => s.name === n),
+      n => managed.has(n) && !desired.some(s => s.name === n),
     )
 
   return {
     name: cli.name,
 
-    async verify(servers) {
+    async verify(desired, managed) {
       const have = await cli.list()
-      const rows = servers.map(s => {
+      const rows = desired.map(s => {
         const url = have.get(s.name)
         return row(
           s.name,
@@ -45,15 +47,15 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
           url ?? s.url,
         )
       })
-      for (const n of staleNames(have, servers))
+      for (const n of staleNames(have, desired, managed))
         rows.push(row(n, 'stale', have.get(n) ?? ''))
       return rows
     },
 
-    async apply(servers) {
+    async apply(desired, managed) {
       const have = await cli.list()
       const rows: McpRow[] = []
-      for (const s of servers) {
+      for (const s of desired) {
         const url = have.get(s.name)
         if (url === s.url) {
           rows.push(row(s.name, 'ok', s.url))
@@ -63,7 +65,7 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
         await cli.add(s)
         rows.push(row(s.name, url === undefined ? 'added' : 'updated', s.url))
       }
-      for (const n of staleNames(have, servers)) {
+      for (const n of staleNames(have, desired, managed)) {
         await cli.remove(n)
         rows.push(row(n, 'stale', 'removed'))
       }

@@ -1,4 +1,5 @@
 import { homedir } from "node:os";
+import { loadHindsightConfig } from "../settings/config";
 import { hindsightApiUrl, hindsightInstalledPlist } from "../settings/paths";
 
 export async function bootout(label: string): Promise<void> {
@@ -41,7 +42,7 @@ export async function status(label: string, plist: string): Promise<void> {
   const exitCode = out.match(/last exit code = ([^\n]+)/)?.[1]?.trim();
   const runs = out.match(/runs = (\d+)/)?.[1];
 
-  const apiUrl = hindsightApiUrl();
+  const apiUrl = hindsightApiUrl((await loadHindsightConfig()).url);
 
   const isRunning = state === "running";
   console.log(
