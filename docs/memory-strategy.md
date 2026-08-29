@@ -73,9 +73,9 @@ version: 1
 
 defaults:
   exclude: # never synced, applies under all sources
-    - "**/.obsidian/**"
-    - "**/.trash/**"
-    - "**/_*/**"
+    - '**/.obsidian/**'
+    - '**/.trash/**'
+    - '**/_*/**'
   promote_frontmatter: [category, scope, priority] # keys → tags when present
 
 sources:
