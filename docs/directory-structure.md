@@ -54,6 +54,9 @@ Dependencies flow one way — `entries` → `adapters`/`domains` → `clients` �
   stays ignorant of any particular harness or file format.
 - **`adapters/`** knows one harness's quirks and nothing else. Generic in,
   harness-shaped out — a domain's vocabulary appearing here is a design smell.
+- **Each domain carries a `README.md`** stating its concern and its boundaries —
+  what it owns, and where the neighbouring work goes instead. It exists to stop
+  drift, so it never lists files or restates what the code says.
 - **Tests sit beside what they cover**, named `*.test.ts`. Behaviour is tested
   through the seam a person would use — a converged config file, a decision the
   bridge returns — rather than through internal calls.
