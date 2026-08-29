@@ -1,7 +1,10 @@
 import { loadMcpAdapters } from '../adapters/index'
 import { loadSources, serversFor } from '../domains/mcp/sources'
 import { managedNames, recordPinned } from '../domains/mcp/state'
+import { ADAPTERS_YML, configWhere } from '../settings/yaml'
 import { kinds } from './kinds'
+
+const ADAPTERS_CONFIG = configWhere(ADAPTERS_YML)
 
 const dryRun = process.argv.includes('--dry-run')
 
@@ -10,7 +13,9 @@ const managed = await managedNames(sources)
 const harnesses = await loadMcpAdapters()
 
 if (harnesses.length === 0) {
-  console.log('mcp — no harnesses opted in (set `mcp:` in config/adapters.yml)')
+  console.log(
+    `mcp — no harnesses opted in (set \`mcp:\` in ${ADAPTERS_CONFIG})`,
+  )
   process.exit(0)
 }
 

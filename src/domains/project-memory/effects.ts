@@ -1,6 +1,6 @@
 import type { JsonRpc, McpUpstream } from '../../clients/mcp-http'
 import type { Action } from './protocol'
-import { ensureBank } from '../../clients/hindsight'
+import { ensureBank } from '../../clients/hindsight/banks'
 
 /** Everything the bridge needs from the outside world, named rather than reached for. */
 export interface Effects {

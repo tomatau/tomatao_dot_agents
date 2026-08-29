@@ -16,6 +16,7 @@ import {
 import { fileLogger } from '../lib/log'
 import { BRIDGE_LOG_FILE } from '../settings/paths'
 
+const SOURCE_FILE = 'mcp/project-memory.yml'
 const ROOTS_ID = 'bridge/roots'
 const ROOTS_TIMEOUT_MS = 5_000
 
@@ -31,7 +32,9 @@ const bankPath = flag('--path')
 // Arguments come from mcp/project-memory.yml; nothing here reads config, so the
 // bridge runs under whatever toolchain the repo it is spawned in provides.
 if (!base || !bankPath?.includes('{bank}')) {
-  await log('need `--url <base>` and `--path <path with {bank}>`')
+  await log(
+    `need \`--url <base>\` and \`--path <path with {bank}>\` — see ${SOURCE_FILE}`,
+  )
   process.exit(1)
 }
 const fx = {

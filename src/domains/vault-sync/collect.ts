@@ -4,7 +4,7 @@ import type { VaultDocument } from './types'
 import { Glob } from 'bun'
 import { parseFrontmatter } from '../../lib/frontmatter'
 import { sha256Hex } from '../../lib/hash'
-import { vaultDir } from '../../settings/config'
+import { vaultDir } from '../../settings/vault'
 import { loadSyncConfig } from './config'
 
 function hashContent(
@@ -48,7 +48,7 @@ export async function collectVaultDocuments(): Promise<
     for (const rel of files) {
       const abs = join(vault, rel)
       const raw = await readFile(abs, 'utf8')
-      const { frontmatter, frontmatterRaw, body } = parseFrontmatter(raw)
+      const { frontmatter, frontmatterRaw, body } = parseFrontmatter(rel, raw)
       const tags = new Set<string>(['source:obsidian'])
       for (const [k, v] of Object.entries(source.tags ?? {}))
         tags.add(`${k}:${v}`)

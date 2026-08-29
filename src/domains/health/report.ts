@@ -1,6 +1,6 @@
 import type { Row, Section } from '../../lib/report'
 import type { McpSources } from '../mcp/sources'
-import { loadAdaptersConfig } from '../../settings/config'
+import { loadAdaptersConfig } from '../../settings/adapters'
 import { nativeSkillHarnesses } from '../skills'
 import { bankRows, mcpPinRows } from './mcp'
 import {

@@ -7,7 +7,12 @@ const OTHER_REPO = 'project-there'
 
 const initialize = (capabilities: object): Event => ({
   on: 'message',
-  message: { jsonrpc: '2.0', id: 1, method: 'initialize', params: { capabilities } },
+  message: {
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'initialize',
+    params: { capabilities },
+  },
 })
 const initialized: Event = {
   on: 'message',
@@ -40,7 +45,7 @@ function run(
   return { session, actions }
 }
 
-const kinds = (actions: Action[]) => actions.map((a) => a.do)
+const kinds = (actions: Action[]) => actions.map(a => a.do)
 
 describe('outside a git repo', () => {
   test('answers initialize itself, since there is nothing to proxy', () => {
@@ -51,8 +56,10 @@ describe('outside a git repo', () => {
     const expectedName = 'project-memory'
     expect(kinds(actions)).toEqual(['reply'])
     const reply = actions[0] as Extract<Action, { do: 'reply' }>
-    expect((reply.message.result as { serverInfo: { name: string } }).serverInfo.name)
-      .toBe(expectedName)
+    expect(
+      (reply.message.result as { serverInfo: { name: string } }).serverInfo
+        .name,
+    ).toBe(expectedName)
   })
 
   test('offers no tools rather than inventing a bank', () => {
@@ -94,7 +101,10 @@ describe('a client that supports roots', () => {
   test('asks for roots only once the client is initialised', () => {
     // Arrange & Act: the spec forbids a server requesting anything earlier.
     const { actions } = run([initialize(withRoots)], THIS_REPO)
-    const afterInitialized = run([initialize(withRoots), initialized], THIS_REPO)
+    const afterInitialized = run(
+      [initialize(withRoots), initialized],
+      THIS_REPO,
+    )
 
     // Assert
     expect(kinds(actions)).not.toContain('ask-roots')
@@ -143,7 +153,7 @@ describe('a client that supports roots', () => {
       THIS_REPO,
     )
 
-    const connects = actions.filter((a) => a.do === 'connect')
+    const connects = actions.filter(a => a.do === 'connect')
     const reconnect = connects.at(-1) as Extract<Action, { do: 'connect' }>
     expect(reconnect.bank).toBe(OTHER_REPO)
   })
@@ -154,7 +164,12 @@ describe('a client that supports roots', () => {
   ])('keeps the cwd bank when %s', (_case, rooted) => {
     // Arrange & Act
     const { session, actions } = run(
-      [initialize(withRoots), initialized, toolCall, { on: 'roots', bank: rooted }],
+      [
+        initialize(withRoots),
+        initialized,
+        toolCall,
+        { on: 'roots', bank: rooted },
+      ],
       THIS_REPO,
     )
 

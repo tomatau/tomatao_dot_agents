@@ -7,7 +7,11 @@ import {
 } from './mcp'
 
 const http: McpTransport = { kind: 'http', url: 'http://127.0.0.1:8888/mcp/a/' }
-const stdio: McpTransport = { kind: 'stdio', command: 'bun', args: ['x.ts', '--flag'] }
+const stdio: McpTransport = {
+  kind: 'stdio',
+  command: 'bun',
+  args: ['x.ts', '--flag'],
+}
 
 describe('transportIdentity', () => {
   test.each([

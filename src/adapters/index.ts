@@ -1,6 +1,6 @@
-import type { HarnessConfig } from '../settings/config'
+import type { HarnessConfig } from '../settings/adapters'
 import type { McpAdapter, PersonalisationAdapter } from './types'
-import { loadAdaptersConfig } from '../settings/config'
+import { loadAdaptersConfig } from '../settings/adapters'
 import { mcp as claudeMcp } from './claude/mcp'
 import { personalisation as claude } from './claude/personalisation'
 import { mcp as codexMcp } from './codex/mcp'

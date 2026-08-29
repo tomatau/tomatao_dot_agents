@@ -1,6 +1,6 @@
-import { type McpConfig, mcpTarget } from '../../settings/config'
 import type { McpAdapter } from '../types'
 import { plainEntry, plainTransport } from '../../lib/mcp'
+import { type McpConfig, mcpTarget } from '../../settings/mcp'
 import { jsonMcpAdapter } from '../json-mcp'
 
 // Zed has no MCP CLI; it reads `context_servers` from `~/.config/zed/settings.json`

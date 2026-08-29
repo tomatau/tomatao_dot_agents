@@ -1,6 +1,6 @@
 import { listSkills, planSkillLinks, skillLinks } from '../domains/skills'
 import { ensureLinks } from '../lib/links'
-import { loadAdaptersConfig } from '../settings/config'
+import { loadAdaptersConfig } from '../settings/adapters'
 
 const skillPlan = planSkillLinks({
   config: skillLinks(await loadAdaptersConfig()),

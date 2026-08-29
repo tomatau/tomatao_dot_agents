@@ -3,11 +3,11 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { McpServer } from '../lib/mcp'
+import type { McpConfig } from '../settings/mcp'
+import type { McpAdapter, McpState } from './types'
 import { mcp as cursor } from './cursor/mcp'
 import { mcp as opencode } from './opencode/mcp'
 import { mcp as zed } from './zed/mcp'
-import type { McpConfig } from '../settings/config'
-import type { McpAdapter, McpState } from './types'
 
 const remote: McpServer = {
   name: 'shared-memory-profile',

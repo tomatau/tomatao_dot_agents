@@ -1,5 +1,5 @@
 import { homedir } from 'node:os'
-import { loadHindsightConfig } from '../settings/config'
+import { loadHindsightConfig } from '../settings/hindsight'
 import { hindsightApiUrl, hindsightInstalledPlist } from '../settings/paths'
 
 export async function bootout(label: string): Promise<void> {

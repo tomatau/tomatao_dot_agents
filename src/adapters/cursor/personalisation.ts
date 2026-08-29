@@ -1,8 +1,8 @@
 import { join } from 'node:path'
 import type { Link } from '../../lib/links'
-import type { AdapterLink } from '../../settings/config'
 import type { PersonalisationAdapter, SourceFile } from '../types'
 import { stripTrailingSlash } from '../../lib/path'
+import { type AdapterLink } from '../../settings/adapters'
 
 // Cursor maps sources 1:1 to rule files; filename becomes the rule's description.
 export function personalisation(links: AdapterLink[]): PersonalisationAdapter {

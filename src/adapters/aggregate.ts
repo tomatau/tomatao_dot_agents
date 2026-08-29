@@ -1,4 +1,4 @@
-import type { AdapterLink } from '../settings/config'
+import type { AdapterLink } from '../settings/adapters'
 import type { PersonalisationAdapter, SourceFile } from './types'
 import { aggregate } from './render'
 

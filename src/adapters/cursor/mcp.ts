@@ -1,6 +1,6 @@
-import { type McpConfig, mcpTarget } from '../../settings/config'
 import type { McpAdapter } from '../types'
 import { plainEntry, plainTransport } from '../../lib/mcp'
+import { type McpConfig, mcpTarget } from '../../settings/mcp'
 import { jsonMcpAdapter } from '../json-mcp'
 
 // Cursor has no MCP CLI; it reads `~/.cursor/mcp.json` (plain JSON).

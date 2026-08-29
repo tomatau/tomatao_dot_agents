@@ -1,6 +1,6 @@
 import type { Row, Section } from '../../lib/report'
 import { checkLinks } from '../../lib/links'
-import { loadAdaptersConfig } from '../../settings/config'
+import { loadAdaptersConfig } from '../../settings/adapters'
 import { SKILLS_DIR, displayPath } from '../../settings/paths'
 import {
   inspectSkills,

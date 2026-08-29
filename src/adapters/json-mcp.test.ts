@@ -23,7 +23,7 @@ const adapter = () =>
     name: 'harness',
     file,
     key: ['mcpServers'],
-    entry: (s) => plainEntry(s.transport),
+    entry: s => plainEntry(s.transport),
     transportOf: plainTransport,
   })
 
@@ -31,7 +31,7 @@ const pinned = async (): Promise<Record<string, unknown>> =>
   JSON.parse(await readFile(file, 'utf8')).mcpServers
 
 const states = (rows: { server: string; state: string }[]) =>
-  Object.fromEntries(rows.map((r) => [r.server, r.state]))
+  Object.fromEntries(rows.map(r => [r.server, r.state]))
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), 'json-mcp-'))
@@ -85,7 +85,10 @@ describe('converging a harness config', () => {
 
     const rows = await adapter().apply([ours], managed)
 
-    expect(states(rows)).toEqual({ [ours.name]: 'ok', [alsoOurs.name]: 'stale' })
+    expect(states(rows)).toEqual({
+      [ours.name]: 'ok',
+      [alsoOurs.name]: 'stale',
+    })
     expect(await pinned()).not.toHaveProperty(alsoOurs.name)
   })
 

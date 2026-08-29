@@ -27,8 +27,16 @@ describe('requireString', () => {
 describe('requireUrl', () => {
   test.each([
     ['absent', {}, 'missing `url`'],
-    ['missing a scheme', { url: '127.0.0.1:8888' }, '`url` is not a valid URL (127.0.0.1:8888)'],
-    ['not a URL at all', { url: 'nonsense' }, '`url` is not a valid URL (nonsense)'],
+    [
+      'missing a scheme',
+      { url: '127.0.0.1:8888' },
+      '`url` is not a valid URL (127.0.0.1:8888)',
+    ],
+    [
+      'not a URL at all',
+      { url: 'nonsense' },
+      '`url` is not a valid URL (nonsense)',
+    ],
   ])('rejects a url that is %s', (_case, raw, expectedDetail) => {
     expectRejection(() => requireUrl(WHERE, raw, 'url'), expectedDetail)
   })

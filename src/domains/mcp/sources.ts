@@ -4,6 +4,9 @@ import type { McpResolver, McpServer } from '../../lib/mcp'
 import { MCP_DIR } from '../../settings/paths'
 import { parseTransport } from './config'
 
+const DIR = 'mcp'
+const EXTENSION = '.yml'
+
 /** An MCP source: one id from `adapters.yml`'s `enable:`, yielding one or more servers. */
 export type McpSources = Map<string, McpServer[]>
 
@@ -27,9 +30,9 @@ export async function loadSources(
   } catch {
     return sources
   }
-  for (const name of files.filter(f => f.endsWith('.yml')).sort()) {
+  for (const name of files.filter(f => f.endsWith(EXTENSION)).sort()) {
     const id = basename(name, extname(name))
-    const where = `mcp/${name}`
+    const where = `${DIR}/${name}`
     const raw = (Bun.YAML.parse(await readFile(join(MCP_DIR, name), 'utf8')) ??
       {}) as Record<string, unknown>
     const kind = raw.kind

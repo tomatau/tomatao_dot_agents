@@ -1,7 +1,7 @@
 import type { McpResolver, McpServer } from '../../lib/mcp'
-import type { HindsightConfig } from '../../settings/config'
+import type { HindsightConfig } from '../../settings/hindsight'
 import { requireString } from '../../lib/parse'
-import { loadHindsightConfig } from '../../settings/config'
+import { loadHindsightConfig } from '../../settings/hindsight'
 import { hindsightApiUrl } from '../../settings/paths'
 
 const BANK = '{bank}'

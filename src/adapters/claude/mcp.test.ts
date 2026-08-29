@@ -29,7 +29,11 @@ describe('reading a `claude mcp list` line', () => {
 
     expect(parseListLine(line)).toEqual([
       'project-memory',
-      { kind: 'stdio', command: 'bun', args: ['/repo/bridge.ts', '--path', '/mcp/{bank}/'] },
+      {
+        kind: 'stdio',
+        command: 'bun',
+        args: ['/repo/bridge.ts', '--path', '/mcp/{bank}/'],
+      },
     ])
   })
 

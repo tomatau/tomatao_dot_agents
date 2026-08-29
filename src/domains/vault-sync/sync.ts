@@ -4,7 +4,7 @@ import {
   listDocumentIds,
   type RetainItem,
   retainDocuments,
-} from '../../clients/hindsight'
+} from '../../clients/hindsight/documents'
 import { planSync, saveCache } from './cache'
 
 const BANK = 'profile'

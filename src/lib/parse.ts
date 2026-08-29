@@ -40,3 +40,27 @@ export function stringArray(
   }
   return value as string[]
 }
+
+/** A value that must be a mapping; anything else is a malformed source. */
+export function asRecord(
+  where: string,
+  value: unknown,
+): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error(`${where}: expected a mapping`)
+  }
+  return value as Record<string, unknown>
+}
+
+/** A required list, left unexamined; the caller checks its items. */
+export function requireList(
+  where: string,
+  raw: Record<string, unknown>,
+  key: string,
+): unknown[] {
+  const value = raw[key]
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`${where}: \`${key}\` must list at least one entry`)
+  }
+  return value
+}

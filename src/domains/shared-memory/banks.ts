@@ -1,5 +1,5 @@
-import { listBankIds, putBank } from '../../clients/hindsight'
-import { loadHindsightConfig } from '../../settings/config'
+import { listBankIds, putBank } from '../../clients/hindsight/banks'
+import { loadHindsightConfig } from '../../settings/hindsight'
 
 export type BankState = 'ok' | 'missing' | 'created'
 

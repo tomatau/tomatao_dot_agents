@@ -39,9 +39,21 @@ describe('naming a repo', () => {
   })
 
   test.each([
-    ['an ssh remote', 'git@github.com:Tomato/My-Repo.git', 'project-github-com-tomato-my-repo'],
-    ['an https remote', 'https://gitlab.com/acme/tools/widget.git', 'project-gitlab-com-acme-tools-widget'],
-    ['a remote without the .git suffix', 'https://github.com/acme/plain', 'project-github-com-acme-plain'],
+    [
+      'an ssh remote',
+      'git@github.com:Tomato/My-Repo.git',
+      'project-github-com-tomato-my-repo',
+    ],
+    [
+      'an https remote',
+      'https://gitlab.com/acme/tools/widget.git',
+      'project-gitlab-com-acme-tools-widget',
+    ],
+    [
+      'a remote without the .git suffix',
+      'https://github.com/acme/plain',
+      'project-github-com-acme-plain',
+    ],
   ])('names a repo from %s', async (_case, remote, expectedBank) => {
     // Arrange
     const repo = await makeRepo(`r-${expectedBank}`, remote)

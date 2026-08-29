@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { type McpConfig, mcpTarget, parseMcpConfig } from './config'
+import { type McpConfig, mcpTarget, parseMcpConfig } from './mcp'
 
 const NEEDS_ONE =
   'config/adapters.yml: cursor mcp needs exactly one of `scope`, `home`, or `file`'
@@ -39,7 +39,7 @@ describe('reading a harness mcp block', () => {
 
     // Assert
     const expectedFile = join(homedir(), '.cursor/mcp.json')
-    expect(parsed).toEqual({ file: expectedFile, enable: undefined })
+    expect(parsed).toEqual({ file: expectedFile, enable: [] })
   })
 
   test('leaves a scope alone, since it names no path', () => {

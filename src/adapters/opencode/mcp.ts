@@ -1,6 +1,6 @@
 import type { McpTransport } from '../../lib/mcp'
-import { type McpConfig, mcpTarget } from '../../settings/config'
 import type { McpAdapter } from '../types'
+import { type McpConfig, mcpTarget } from '../../settings/mcp'
 import { jsonMcpAdapter } from '../json-mcp'
 
 // `opencode mcp add` can create entries but there is no `remove`, so we converge
