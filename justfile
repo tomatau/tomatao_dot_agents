@@ -19,6 +19,10 @@ link-skills:
     bun src/entries/skills.ts
 
 [group('health')]
+test *args:
+    bun test {{args}}
+
+[group('health')]
 doctor:
     bun src/entries/doctor.ts
 

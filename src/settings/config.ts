@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { requireUrl } from '../lib/parse'
+import { requireString, requireUrl } from '../lib/parse'
 import { REPO } from './paths'
 
 export function vaultDir(): string {
@@ -54,14 +54,52 @@ export interface AdapterLink {
 /** `harness -> link list`, the shape the skill-link planner works over. */
 export type HarnessLinks = Record<string, AdapterLink[]>
 
+/**
+ * Where a harness keeps its MCP configuration: a CLI scope, a CLI home, or a
+ * file we converge. Exactly one, so a harness can never be told nothing or two
+ * contradictory things.
+ */
+export type McpTarget = { scope: string } | { home: string } | { file: string }
+
+const TARGETS = ['scope', 'home', 'file'] as const
+
 /** Settings for pinning MCP servers into one harness. */
-export interface McpConfig {
-  /** Ids of the MCP sources to pin here; see `src/domains/mcp.ts`. */
+export type McpConfig = McpTarget & {
+  /** Ids of the MCP sources to pin here; see `src/entries/kinds.ts`. */
   enable?: string[]
-  /** claude: the `claude mcp` config scope (`user` by default). */
-  scope?: string
-  /** codex: the CLI home to write to, overriding any inherited `CODEX_HOME`. */
-  home?: string
+}
+
+/** Read one harness's `mcp:` block, rejecting a shape no adapter could use. */
+export function parseMcpConfig(
+  harness: string,
+  raw: Record<string, unknown>,
+): McpConfig {
+  const where = `config/adapters.yml: ${harness} mcp`
+  const given = TARGETS.filter(key => raw[key] !== undefined)
+  if (given.length !== 1) {
+    throw new Error(
+      `${where} needs exactly one of \`scope\`, \`home\`, or \`file\`` +
+        (given.length ? ` (found ${given.join(', ')})` : ''),
+    )
+  }
+  const [key] = given
+  const value = requireString(where, raw, key)
+  const enable = raw.enable as string[] | undefined
+  const target = key === 'scope' ? value : resolvePath(value)
+  return { [key]: target, enable } as McpConfig
+}
+
+/** The one target a harness was configured with, when the adapter needs it. */
+export function mcpTarget(
+  harness: string,
+  cfg: McpConfig,
+  key: (typeof TARGETS)[number],
+): string {
+  const value = (cfg as Record<string, unknown>)[key]
+  if (typeof value !== 'string' || !value) {
+    throw new Error(`config/adapters.yml: ${harness} mcp needs \`${key}\``)
+  }
+  return value
 }
 
 /** One harness's slice of `config/adapters.yml`. */
@@ -110,10 +148,8 @@ export async function loadAdaptersConfig(): Promise<AdaptersConfig> {
         skills: Array.isArray(cfg.skills)
           ? resolveLinks(cfg.skills)
           : cfg.skills,
-        mcp: cfg.mcp && {
-          ...cfg.mcp,
-          home: cfg.mcp.home && resolvePath(cfg.mcp.home),
-        },
+        mcp:
+          cfg.mcp && parseMcpConfig(name, cfg.mcp as Record<string, unknown>),
       },
     ]),
   )

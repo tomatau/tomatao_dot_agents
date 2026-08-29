@@ -24,6 +24,7 @@ opencode:
       target: dist/opencode/AGENTS.md
   skills: native
   mcp:
+    file: '~/.config/opencode/opencode.jsonc'
     enable: [shared-memory, project-memory]
 
 zed:
@@ -32,6 +33,7 @@ zed:
       target: dist/zed/AGENTS.md
   skills: native
   mcp:
+    file: '~/.config/zed/settings.json'
     enable: [shared-memory, project-memory]
 
 cursor:
@@ -42,4 +44,5 @@ cursor:
     - dest: '~/.cursor/skills/'
       target: skills/
   mcp:
+    file: '~/.cursor/mcp.json'
     enable: [shared-memory, project-memory]

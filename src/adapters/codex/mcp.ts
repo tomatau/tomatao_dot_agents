@@ -1,4 +1,4 @@
-import type { McpConfig } from '../../settings/config'
+import { type McpConfig, mcpTarget } from '../../settings/config'
 import type { McpAdapter } from '../types'
 import {
   type McpTransport,
@@ -13,14 +13,12 @@ interface CodexServer {
 }
 
 // Codex owns its MCP config through the `codex mcp` CLI (writes <CODEX_HOME>/config.toml).
-// `home` from adapters.yml pins CODEX_HOME so a direnv-injected value (this repo
-// sets one for an isolated auth dir) can't misdirect the write.
+// `home` from adapters.yml always pins CODEX_HOME: trusting an inherited one is
+// the hazard this field exists to prevent (this repo injects an isolated auth dir).
 export function mcp(cfg: McpConfig): McpAdapter {
-  const env = cfg.home ? { ...process.env, CODEX_HOME: cfg.home } : undefined
-  const run = (args: string[]) => {
-    const cmd = Bun.$`codex mcp ${args}`.quiet().nothrow()
-    return env ? cmd.env(env) : cmd
-  }
+  const env = { ...process.env, CODEX_HOME: mcpTarget('codex', cfg, 'home') }
+  const run = (args: string[]) =>
+    Bun.$`codex mcp ${args}`.quiet().nothrow().env(env)
 
   return cliMcpAdapter({
     name: 'codex',

@@ -1,17 +1,15 @@
-import { homedir } from 'node:os'
-import { join } from 'node:path'
 import type { McpTransport } from '../../lib/mcp'
-import type { McpConfig } from '../../settings/config'
+import { type McpConfig, mcpTarget } from '../../settings/config'
 import type { McpAdapter } from '../types'
 import { jsonMcpAdapter } from '../json-mcp'
 
 // `opencode mcp add` can create entries but there is no `remove`, so we converge
 // `~/.config/opencode/opencode.jsonc` directly. It splits remote/local by `type`,
 // and a local server's command and args share one array.
-export function mcp(_cfg: McpConfig): McpAdapter {
+export function mcp(cfg: McpConfig): McpAdapter {
   return jsonMcpAdapter({
     name: 'opencode',
-    file: join(homedir(), '.config/opencode/opencode.jsonc'),
+    file: mcpTarget('opencode', cfg, 'file'),
     key: ['mcp'],
     entry: s =>
       s.transport.kind === 'http'

@@ -1,4 +1,4 @@
-import type { McpConfig } from '../../settings/config'
+import { type McpConfig, mcpTarget } from '../../settings/config'
 import type { McpAdapter } from '../types'
 import {
   type McpTransport,
@@ -9,26 +9,28 @@ import { cliMcpAdapter } from '../mcp-cli'
 
 // Claude Code owns its MCP config through the `claude mcp` CLI; we never edit
 // ~/.claude.json directly.
-export function mcp(cfg: McpConfig): McpAdapter {
-  const scope = cfg.scope ?? 'user'
-  const run = (args: string[]) => Bun.$`claude mcp ${args}`.quiet().nothrow()
-
-  // `claude mcp list` prints `<name>: <detail> - <status>`, where detail is a url
-  // marked `(HTTP)` or a command line. Names may contain spaces, so split on the
-  // last ` - `; connectors managed by claude.ai omit the marker and read as stdio,
-  // which is harmless because only names we manage are ever compared.
-  const parse = (line: string): [string, McpTransport] | undefined => {
-    const colon = line.indexOf(': ')
-    const dash = line.lastIndexOf(' - ')
-    if (colon === -1 || dash <= colon) return undefined
-    const name = line.slice(0, colon)
-    const detail = line.slice(colon + 2, dash).trim()
-    if (detail.endsWith(' (HTTP)')) {
-      return [name, { kind: 'http', url: detail.slice(0, -7).trim() }]
-    }
-    const [command, ...args] = detail.split(/\s+/)
-    return command ? [name, { kind: 'stdio', command, args }] : undefined
+// `claude mcp list` prints `<name>: <detail> - <status>`, where detail is a url
+// marked `(HTTP)` or a command line. Names may contain spaces, so split on the
+// last ` - `; connectors managed by claude.ai omit the marker and read as stdio,
+// which is harmless because only names we manage are ever compared.
+export const parseListLine = (
+  line: string,
+): [string, McpTransport] | undefined => {
+  const colon = line.indexOf(': ')
+  const dash = line.lastIndexOf(' - ')
+  if (colon === -1 || dash <= colon) return undefined
+  const name = line.slice(0, colon)
+  const detail = line.slice(colon + 2, dash).trim()
+  if (detail.endsWith(' (HTTP)')) {
+    return [name, { kind: 'http', url: detail.slice(0, -7).trim() }]
   }
+  const [command, ...args] = detail.split(/\s+/)
+  return command ? [name, { kind: 'stdio', command, args }] : undefined
+}
+
+export function mcp(cfg: McpConfig): McpAdapter {
+  const scope = mcpTarget('claude', cfg, 'scope')
+  const run = (args: string[]) => Bun.$`claude mcp ${args}`.quiet().nothrow()
 
   return cliMcpAdapter({
     name: 'claude',
@@ -37,7 +39,7 @@ export function mcp(cfg: McpConfig): McpAdapter {
       const out = (await run(['list'])).stdout.toString()
       const found = new Map<string, string>()
       for (const line of out.split('\n')) {
-        const parsed = parse(line)
+        const parsed = parseListLine(line)
         if (parsed) found.set(parsed[0], transportIdentity(parsed[1]))
       }
       return found

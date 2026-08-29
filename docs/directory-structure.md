@@ -54,6 +54,9 @@ Dependencies flow one way — `entries` → `adapters`/`domains` → `clients` �
   stays ignorant of any particular harness or file format.
 - **`adapters/`** knows one harness's quirks and nothing else. Generic in,
   harness-shaped out — a domain's vocabulary appearing here is a design smell.
+- **Tests sit beside what they cover**, named `*.test.ts`. Behaviour is tested
+  through the seam a person would use — a converged config file, a decision the
+  bridge returns — rather than through internal calls.
 - **`entries/`** parses arguments and prints results, one per command. Logic
   that grows here has a home one layer down — with one exception: composition.
   A registry naming every provider of something points _at_ those providers, so
