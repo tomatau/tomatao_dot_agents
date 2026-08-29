@@ -1,5 +1,5 @@
 import { loadMcpAdapters } from '../adapters/index'
-import { kinds } from '../domains/mcp/kinds'
+import { kinds } from './kinds'
 import { loadSources, serversFor } from '../domains/mcp/sources'
 import { managedNames, recordPinned } from '../domains/mcp/state'
 

@@ -1,7 +1,9 @@
 import { collectSections } from '../domains/health/report'
+import { loadSources } from '../domains/mcp/sources'
+import { kinds } from './kinds'
 import { printSection, tally } from '../lib/report'
 
-const sections = await collectSections()
+const sections = await collectSections(await loadSources(kinds))
 for (const s of sections) printSection(s)
 
 const { ok, failures } = tally(sections)

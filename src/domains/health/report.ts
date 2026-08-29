@@ -1,5 +1,6 @@
 import { loadAdaptersConfig } from '../../settings/config'
 import type { Row, Section } from '../../lib/report'
+import type { McpSources } from '../mcp/sources'
 import { bankRows, mcpPinRows } from './mcp'
 import {
   personalisationLinkRows,
@@ -29,7 +30,7 @@ async function section(
   }
 }
 
-export async function collectSections(): Promise<Section[]> {
+export async function collectSections(sources: McpSources): Promise<Section[]> {
   return (
     [
       await section('personalisation sources', personalisationSourceRows),
@@ -37,7 +38,7 @@ export async function collectSections(): Promise<Section[]> {
       await section('renders (dist vs fresh render)', renderRows),
       await section('personalisation links', personalisationLinkRows),
       await section('skill links', skillLinkRows),
-      await section('mcp pins', mcpPinRows),
+      await section('mcp pins', () => mcpPinRows(sources)),
       await section('hindsight banks', bankRows),
       nativeSection(nativeSkillHarnesses(await loadAdaptersConfig())),
     ]
