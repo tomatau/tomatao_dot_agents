@@ -46,3 +46,11 @@ cursor:
   mcp:
     file: '~/.cursor/mcp.json'
     enable: [shared-memory, project-memory]
+
+warp:
+  personalisation:
+    - dest: '~/.agents/AGENTS.md'
+      target: dist/warp/AGENTS.md
+  mcp:
+    file: '~/.warp/.mcp.json'
+    enable: [shared-memory, project-memory]

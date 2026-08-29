@@ -10,3 +10,6 @@ personalisation/*
 !personalisation/Shared memory.md
 .DS_Store
 mcp/.state.json
+
+# Warp reads its global rules from this repo root; the file is a rendered link.
+/AGENTS.md
