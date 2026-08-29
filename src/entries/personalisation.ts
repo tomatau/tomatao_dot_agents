@@ -18,7 +18,7 @@ async function render(): Promise<void> {
 async function link(): Promise<void> {
   const sources = await listSources()
   const adapters = await loadPersonalisationAdapters()
-  const links = adapters.flatMap((a) => a.links(sources))
+  const links = adapters.flatMap(a => a.links(sources))
   for (const enforced of await ensureLinks({ links })) {
     console.log(`${enforced.result.padEnd(13)}${enforced.link.dest}`)
   }

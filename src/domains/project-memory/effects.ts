@@ -1,6 +1,6 @@
 import type { JsonRpc, McpUpstream } from '../../clients/mcp-http'
-import { ensureBank } from '../../clients/hindsight'
 import type { Action } from './protocol'
+import { ensureBank } from '../../clients/hindsight'
 
 /** Everything the bridge needs from the outside world, named rather than reached for. */
 export interface Effects {
@@ -17,7 +17,10 @@ export async function perform(action: Action, fx: Effects): Promise<void> {
     case 'reply':
       return fx.send(action.message)
     case 'connect': {
-      const replies = await fx.upstream.connect(fx.bankUrl(action.bank), action.init)
+      const replies = await fx.upstream.connect(
+        fx.bankUrl(action.bank),
+        action.init,
+      )
       for (const out of replies) fx.send(out)
       return
     }
@@ -28,7 +31,8 @@ export async function perform(action: Action, fx: Effects): Promise<void> {
     case 'ask-roots':
       return fx.send(fx.rootsRequest)
     case 'ensure-bank': {
-      if (await ensureBank(action.bank)) await fx.log(`created bank ${action.bank}`)
+      if (await ensureBank(action.bank))
+        await fx.log(`created bank ${action.bank}`)
       return
     }
     case 'log':

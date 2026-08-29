@@ -1,6 +1,6 @@
 import { unlink } from 'node:fs/promises'
-import { ensureLinks } from '../../lib/links'
 import { bootout, bootstrap } from '../../clients/launchd'
+import { ensureLinks } from '../../lib/links'
 import {
   HINDSIGHT_LABEL,
   HINDSIGHT_PLIST_REPO,

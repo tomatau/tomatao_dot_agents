@@ -5,5 +5,18 @@
   "semi": false,
   "singleQuote": true,
   "singleAttributePerLine": true,
-  "arrowParens": "avoid"
+  "arrowParens": "avoid",
+  "sortImports": {
+    "newlinesBetween": false,
+    "groups": [
+      "builtin",
+      "type",
+      "external",
+      ["internal", "subpath"],
+      ["parent", "sibling", "index"],
+      "style",
+      "unknown",
+      ["side_effect", "side_effect_style"]
+    ]
+  }
 }

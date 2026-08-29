@@ -1,8 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
+import type { SyncCache, SyncPlan, VaultDocument } from './types'
 import { VAULT_SYNC_CACHE } from '../../settings/paths'
 import { collectVaultDocuments } from './collect'
-import type { SyncCache, SyncPlan, VaultDocument } from './types'
 
 export async function loadCache(): Promise<SyncCache> {
   try {
@@ -36,6 +36,6 @@ export async function planSync(remoteIds: string[] = []): Promise<SyncPlan> {
     else unchanged.push(doc)
   }
   const known = new Set<string>([...Object.keys(cache.entries), ...remoteIds])
-  const toPurge = [...known].filter((id) => !desired.has(id))
+  const toPurge = [...known].filter(id => !desired.has(id))
   return { desired, cache, toAdd, toUpdate, unchanged, toPurge }
 }

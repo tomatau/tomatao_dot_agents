@@ -27,7 +27,7 @@ export async function loadSources(
   } catch {
     return sources
   }
-  for (const name of files.filter((f) => f.endsWith('.yml')).sort()) {
+  for (const name of files.filter(f => f.endsWith('.yml')).sort()) {
     const id = basename(name, extname(name))
     const where = `mcp/${name}`
     const raw = (Bun.YAML.parse(await readFile(join(MCP_DIR, name), 'utf8')) ??
@@ -48,7 +48,7 @@ export function serversFor(
   sources: McpSources,
   enable: string[] = [],
 ): McpServer[] {
-  return enable.flatMap((id) => {
+  return enable.flatMap(id => {
     const servers = sources.get(id)
     if (!servers) throw new Error(`unknown mcp source "${id}"`)
     return servers

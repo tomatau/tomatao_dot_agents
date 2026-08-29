@@ -1,6 +1,6 @@
 import type { McpResolver, McpServer } from '../../lib/mcp'
-import { requireString } from '../../lib/parse'
 import type { HindsightConfig } from '../../settings/config'
+import { requireString } from '../../lib/parse'
 import { loadHindsightConfig } from '../../settings/config'
 import { hindsightApiUrl } from '../../settings/paths'
 

@@ -1,9 +1,9 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { McpConfig } from '../../settings/config'
-import { jsonMcpAdapter } from '../json-mcp'
-import { plainEntry, plainTransport } from '../../lib/mcp'
 import type { McpAdapter } from '../types'
+import { plainEntry, plainTransport } from '../../lib/mcp'
+import { jsonMcpAdapter } from '../json-mcp'
 
 // Zed has no MCP CLI; it reads `context_servers` from `~/.config/zed/settings.json`
 // (JSONC, hand-maintained — edits must preserve comments and formatting).

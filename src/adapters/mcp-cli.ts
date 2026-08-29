@@ -1,6 +1,6 @@
-import { transportIdentity } from '../lib/mcp'
-import type { McpAdapter, McpRow } from './types'
 import type { McpServer } from '../lib/mcp'
+import type { McpAdapter, McpRow } from './types'
+import { transportIdentity } from '../lib/mcp'
 
 /** The harness-specific half of a CLI-driven MCP adapter. */
 export interface CliMcp {

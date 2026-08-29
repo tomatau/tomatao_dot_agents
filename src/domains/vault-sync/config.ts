@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { loadVaultConfig, vaultDir } from '../../settings/config'
 import type { SyncConfig } from './types'
+import { loadVaultConfig, vaultDir } from '../../settings/config'
 
 export async function loadSyncConfig(): Promise<SyncConfig> {
   const vault = vaultDir()

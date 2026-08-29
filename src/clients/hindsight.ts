@@ -5,7 +5,7 @@ import { hindsightApiUrl } from '../settings/paths'
 let base: Promise<string> | undefined
 
 async function apiUrl(path: string): Promise<string> {
-  base ??= loadHindsightConfig().then((c) => hindsightApiUrl(c.url))
+  base ??= loadHindsightConfig().then(c => hindsightApiUrl(c.url))
   return `${await base}${path}`
 }
 
@@ -16,7 +16,7 @@ export async function listBankIds(): Promise<Set<string>> {
     throw new Error(`list banks failed ${res.status}: ${await res.text()}`)
   }
   const data = (await res.json()) as { banks: { bank_id: string }[] }
-  return new Set((data.banks ?? []).map((b) => b.bank_id))
+  return new Set((data.banks ?? []).map(b => b.bank_id))
 }
 
 /** Create a bank, or leave an existing one as it is. */

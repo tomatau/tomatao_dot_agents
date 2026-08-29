@@ -1,10 +1,6 @@
 import type { JsonRpc } from '../../clients/mcp-http'
-import {
-  type Action,
-  type Event,
-  type Session,
-  idle,
-} from './protocol'
+import type { Action, Event, Session } from './protocol'
+import { idle } from './protocol'
 
 /** Fix the bank, then release everything that arrived while it was unsettled. */
 function settle(session: Session, rooted?: string): [Session, Action[]] {

@@ -1,8 +1,8 @@
 import { access, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { SKILLS_DIR } from '../settings/paths'
-import { stripTrailingSlash } from '../lib/path'
 import type { AdaptersConfig, HarnessLinks } from '../settings/config'
+import { stripTrailingSlash } from '../lib/path'
+import { SKILLS_DIR } from '../settings/paths'
 
 /** Harnesses that mirror `skills/`, mapped to their base link. */
 export function skillLinks(config: AdaptersConfig): HarnessLinks {
@@ -30,8 +30,8 @@ export function planSkillLinks({
   return Object.fromEntries(
     Object.entries(config).map(([harness, baseLinks]) => [
       harness,
-      baseLinks.flatMap((base) =>
-        skills.map((skill) => ({
+      baseLinks.flatMap(base =>
+        skills.map(skill => ({
           dest: join(stripTrailingSlash(base.dest), skill),
           target: join(stripTrailingSlash(base.target), skill),
         })),
@@ -43,8 +43,8 @@ export function planSkillLinks({
 export async function listSkills(): Promise<string[]> {
   const entries = await readdir(SKILLS_DIR, { withFileTypes: true })
   return entries
-    .filter((e) => e.isDirectory())
-    .map((e) => e.name)
+    .filter(e => e.isDirectory())
+    .map(e => e.name)
     .sort()
 }
 
@@ -58,7 +58,7 @@ export interface SkillCheck {
 
 export async function inspectSkills(): Promise<SkillCheck[]> {
   return Promise.all(
-    (await listSkills()).map(async (name) => {
+    (await listSkills()).map(async name => {
       const path = join(SKILLS_DIR, name, 'SKILL.md')
       try {
         await access(path)

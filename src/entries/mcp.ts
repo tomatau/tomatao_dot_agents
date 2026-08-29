@@ -1,7 +1,7 @@
 import { loadMcpAdapters } from '../adapters/index'
-import { kinds } from './kinds'
 import { loadSources, serversFor } from '../domains/mcp/sources'
 import { managedNames, recordPinned } from '../domains/mcp/state'
+import { kinds } from './kinds'
 
 const dryRun = process.argv.includes('--dry-run')
 

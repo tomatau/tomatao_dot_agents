@@ -13,8 +13,8 @@ function parse(body: string, contentType: string): JsonRpc[] {
   }
   return text
     .split('\n')
-    .filter((l) => l.startsWith('data:'))
-    .map((l) => JSON.parse(l.slice(5).trim()))
+    .filter(l => l.startsWith('data:'))
+    .map(l => JSON.parse(l.slice(5).trim()))
 }
 
 /** One MCP session against a streamable-HTTP endpoint. */

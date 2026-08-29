@@ -1,19 +1,19 @@
 import { join } from 'node:path'
 import { status } from '../clients/launchd'
 import {
-  HINDSIGHT_LABEL,
-  HINDSIGHT_LOG_FILE,
-  HINDSIGHT_PLIST_REPO,
-} from '../settings/paths'
-import { render } from '../domains/hindsight/plist'
-import { ensureBanks } from '../domains/shared-memory/banks'
-import {
   install,
   restart,
   start,
   stop,
   uninstall,
 } from '../domains/hindsight/lifecycle'
+import { render } from '../domains/hindsight/plist'
+import { ensureBanks } from '../domains/shared-memory/banks'
+import {
+  HINDSIGHT_LABEL,
+  HINDSIGHT_LOG_FILE,
+  HINDSIGHT_PLIST_REPO,
+} from '../settings/paths'
 
 const cmd = process.argv[2] ?? 'help'
 switch (cmd) {

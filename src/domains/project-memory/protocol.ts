@@ -51,8 +51,11 @@ const fail = (id: unknown, code: number, message: string): Action => ({
 })
 
 /** The reply sent when an effect throws; the shell needs the message itself. */
-export const internalError = (id: unknown, detail: string): JsonRpc =>
-  ({ jsonrpc: '2.0', id, error: { code: INTERNAL, message: detail } })
+export const internalError = (id: unknown, detail: string): JsonRpc => ({
+  jsonrpc: '2.0',
+  id,
+  error: { code: INTERNAL, message: detail },
+})
 
 /** With no bank there is nothing to proxy, so answer plainly and offer no tools. */
 export function idle(message: JsonRpc): Action[] {

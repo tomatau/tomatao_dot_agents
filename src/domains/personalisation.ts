@@ -7,7 +7,7 @@ const FRONTMATTER = /^---\n[\s\S]*?\n---\n/
 
 export async function listSources(): Promise<SourceFile[]> {
   const entries = await readdir(PERSONALISATION_DIR)
-  const files = entries.filter((f) => f.endsWith('.md')).sort()
+  const files = entries.filter(f => f.endsWith('.md')).sort()
   if (files.length === 0) {
     throw new Error(`no .md sources found in ${PERSONALISATION_DIR}`)
   }
@@ -33,10 +33,10 @@ export interface SourceCheck {
 export async function inspectSources(): Promise<SourceCheck[]> {
   const entries = await readdir(PERSONALISATION_DIR, { withFileTypes: true })
   const files = entries
-    .filter((e) => e.name.endsWith('.md'))
+    .filter(e => e.name.endsWith('.md'))
     .sort((a, b) => a.name.localeCompare(b.name))
   return Promise.all(
-    files.map(async (entry) => {
+    files.map(async entry => {
       const path = join(PERSONALISATION_DIR, entry.name)
       if (entry.isSymbolicLink()) {
         try {

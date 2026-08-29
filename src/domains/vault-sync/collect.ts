@@ -1,11 +1,11 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import type { VaultDocument } from './types'
 import { Glob } from 'bun'
-import { vaultDir } from '../../settings/config'
 import { parseFrontmatter } from '../../lib/frontmatter'
 import { sha256Hex } from '../../lib/hash'
+import { vaultDir } from '../../settings/config'
 import { loadSyncConfig } from './config'
-import type { VaultDocument } from './types'
 
 function hashContent(
   frontmatterRaw: string,
@@ -26,7 +26,7 @@ async function collectFiles(
   const results: string[] = []
   for await (const rel of glob.scan({ cwd: vault, onlyFiles: true })) {
     if (!rel.endsWith('.md')) continue
-    if (excludes.some((excl) => excl.match(rel))) continue
+    if (excludes.some(excl => excl.match(rel))) continue
     results.push(rel)
   }
   return results
@@ -38,7 +38,7 @@ export async function collectVaultDocuments(): Promise<
   const vault = vaultDir()
   const config = await loadSyncConfig()
   const excludes = (config.defaults.exclude ?? []).map(
-    (pattern) => new Glob(pattern),
+    pattern => new Glob(pattern),
   )
   const promoteKeys = new Set(config.defaults.promote_frontmatter ?? [])
   const desired = new Map<string, VaultDocument>()

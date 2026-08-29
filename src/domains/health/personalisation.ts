@@ -1,7 +1,7 @@
-import { loadPersonalisationAdapters } from '../../adapters/index'
-import { checkFreshness } from '../../adapters/freshness'
-import { checkLinks } from '../../lib/links'
 import type { Row } from '../../lib/report'
+import { checkFreshness } from '../../adapters/freshness'
+import { loadPersonalisationAdapters } from '../../adapters/index'
+import { checkLinks } from '../../lib/links'
 import { inspectSources, listSources } from '../personalisation'
 
 export async function personalisationSourceRows(): Promise<Row[]> {

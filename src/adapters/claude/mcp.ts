@@ -1,11 +1,11 @@
 import type { McpConfig } from '../../settings/config'
-import { cliMcpAdapter } from '../mcp-cli'
+import type { McpAdapter } from '../types'
 import {
   type McpTransport,
   transportIdentity,
   type McpServer,
 } from '../../lib/mcp'
-import type { McpAdapter } from '../types'
+import { cliMcpAdapter } from '../mcp-cli'
 
 // Claude Code owns its MCP config through the `claude mcp` CLI; we never edit
 // ~/.claude.json directly.

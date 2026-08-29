@@ -1,6 +1,9 @@
 import { dirname } from 'node:path'
 
-const run = async (cwd: string, args: string[]): Promise<string | undefined> => {
+const run = async (
+  cwd: string,
+  args: string[],
+): Promise<string | undefined> => {
   const res = await Bun.$`git ${args}`.cwd(cwd).quiet().nothrow()
   if (res.exitCode !== 0) return undefined
   const out = res.stdout.toString().trim()

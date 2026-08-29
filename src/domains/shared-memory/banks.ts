@@ -12,7 +12,7 @@ export interface BankCheck {
 export async function inspectBanks(): Promise<BankCheck[]> {
   const { banks } = await loadHindsightConfig()
   const have = await listBankIds()
-  return banks.map((b) => ({
+  return banks.map(b => ({
     id: b.id,
     state: have.has(b.id) ? 'ok' : 'missing',
   }))

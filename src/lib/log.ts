@@ -6,7 +6,7 @@ import { dirname } from 'node:path'
  * failure to write is swallowed rather than raised.
  */
 export function fileLogger(path: string): (line: string) => Promise<void> {
-  return async (line) => {
+  return async line => {
     try {
       await mkdir(dirname(path), { recursive: true })
       await appendFile(path, `${new Date().toISOString()} ${line}\n`)

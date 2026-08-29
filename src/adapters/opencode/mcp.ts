@@ -1,9 +1,9 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import type { McpConfig } from '../../settings/config'
-import { jsonMcpAdapter } from '../json-mcp'
 import type { McpTransport } from '../../lib/mcp'
+import type { McpConfig } from '../../settings/config'
 import type { McpAdapter } from '../types'
+import { jsonMcpAdapter } from '../json-mcp'
 
 // `opencode mcp add` can create entries but there is no `remove`, so we converge
 // `~/.config/opencode/opencode.jsonc` directly. It splits remote/local by `type`,

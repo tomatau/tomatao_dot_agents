@@ -1,8 +1,8 @@
-import { loadMcpAdapters } from '../../adapters/index'
 import type { Row } from '../../lib/report'
-import { inspectBanks } from '../shared-memory/banks'
+import { loadMcpAdapters } from '../../adapters/index'
 import { type McpSources, serversFor } from '../mcp/sources'
 import { managedNames } from '../mcp/state'
+import { inspectBanks } from '../shared-memory/banks'
 
 // Read-only equivalent of `just mcp` — reports whether each opted-in harness has
 // the servers it enables pinned, and flags managed pins it no longer wants.

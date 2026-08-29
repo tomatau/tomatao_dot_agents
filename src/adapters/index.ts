@@ -1,4 +1,5 @@
 import type { HarnessConfig } from '../settings/config'
+import type { McpAdapter, PersonalisationAdapter } from './types'
 import { loadAdaptersConfig } from '../settings/config'
 import { mcp as claudeMcp } from './claude/mcp'
 import { personalisation as claude } from './claude/personalisation'
@@ -8,7 +9,6 @@ import { mcp as cursorMcp } from './cursor/mcp'
 import { personalisation as cursor } from './cursor/personalisation'
 import { mcp as opencodeMcp } from './opencode/mcp'
 import { personalisation as opencode } from './opencode/personalisation'
-import type { McpAdapter, PersonalisationAdapter } from './types'
 import { mcp as zedMcp } from './zed/mcp'
 import { personalisation as zed } from './zed/personalisation'
 

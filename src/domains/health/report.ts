@@ -1,13 +1,13 @@
-import { loadAdaptersConfig } from '../../settings/config'
 import type { Row, Section } from '../../lib/report'
 import type { McpSources } from '../mcp/sources'
+import { loadAdaptersConfig } from '../../settings/config'
+import { nativeSkillHarnesses } from '../skills'
 import { bankRows, mcpPinRows } from './mcp'
 import {
   personalisationLinkRows,
   personalisationSourceRows,
   renderRows,
 } from './personalisation'
-import { nativeSkillHarnesses } from '../skills'
 import { nativeSection, skillLinkRows, skillSourceRows } from './skills'
 
 const PASS_STATES = new Set(['ok', 'fresh', 'local'])

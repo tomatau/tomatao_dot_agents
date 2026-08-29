@@ -44,7 +44,8 @@ export async function projectBankId(cwd: string): Promise<string | undefined> {
 export async function rootBankId(
   message: JsonRpc,
 ): Promise<string | undefined> {
-  const uri = (message.result as { roots?: { uri?: string }[] })?.roots?.[0]?.uri
+  const uri = (message.result as { roots?: { uri?: string }[] })?.roots?.[0]
+    ?.uri
   if (!uri?.startsWith('file://')) return undefined
   return projectBankId(decodeURIComponent(new URL(uri).pathname))
 }

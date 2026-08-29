@@ -6,13 +6,13 @@
 import { McpUpstream, type JsonRpc } from '../clients/mcp-http'
 import { step } from '../domains/project-memory/decide'
 import { perform } from '../domains/project-memory/effects'
+import { projectBankId, rootBankId } from '../domains/project-memory/identity'
 import {
   type Event,
   type Session,
   internalError,
   newSession,
 } from '../domains/project-memory/protocol'
-import { projectBankId, rootBankId } from '../domains/project-memory/identity'
 import { fileLogger } from '../lib/log'
 import { BRIDGE_LOG_FILE } from '../settings/paths'
 

@@ -15,7 +15,7 @@ export async function checkFreshness(
   sources: SourceFile[],
 ): Promise<FreshnessCheck[]> {
   return Promise.all(
-    adapter.render(sources).map(async (file) => {
+    adapter.render(sources).map(async file => {
       let onDisk: string | null = null
       try {
         onDisk = await readFile(file.distPath, 'utf8')

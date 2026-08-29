@@ -1,3 +1,4 @@
+import type { VaultDocument } from './types'
 import {
   deleteDocument,
   listDocumentIds,
@@ -5,7 +6,6 @@ import {
   retainDocuments,
 } from '../../clients/hindsight'
 import { planSync, saveCache } from './cache'
-import type { VaultDocument } from './types'
 
 const BANK = 'profile'
 
@@ -32,12 +32,12 @@ export async function syncProfile(
   if (added + updated > 0) {
     console.log(
       [...plan.toAdd, ...plan.toUpdate]
-        .map((d) => `  ${d.documentId}`)
+        .map(d => `  ${d.documentId}`)
         .join('\n'),
     )
   }
   if (purged > 0)
-    console.log(plan.toPurge.map((id) => `  purge ${id}`).join('\n'))
+    console.log(plan.toPurge.map(id => `  purge ${id}`).join('\n'))
 
   if (opts.dryRun) {
     console.log('(dry-run, no writes)')

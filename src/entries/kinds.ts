@@ -1,7 +1,7 @@
 import type { McpResolver } from '../lib/mcp'
-import { PROJECT_MEMORY_ENTRY } from '../settings/paths'
 import { projectMemorySource } from '../domains/project-memory/source'
 import { sharedMemorySource } from '../domains/shared-memory/sources'
+import { PROJECT_MEMORY_ENTRY } from '../settings/paths'
 
 /**
  * Which `kind:` values `mcp/<id>.yml` may use. Composition, so it lives with the

@@ -35,7 +35,7 @@ export function stringArray(
 ): string[] {
   const value = raw[key]
   if (value === undefined) return []
-  if (!Array.isArray(value) || value.some((v) => typeof v !== 'string')) {
+  if (!Array.isArray(value) || value.some(v => typeof v !== 'string')) {
     throw new Error(`${where}: \`${key}\` must be a list of strings`)
   }
   return value as string[]
