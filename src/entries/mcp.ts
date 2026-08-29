@@ -1,10 +1,15 @@
 import { loadMcpAdapters } from '../adapters/index'
-import { loadSources, managedNames, serversFor } from '../domains/mcp'
+import {
+  loadSources,
+  managedNames,
+  recordPinned,
+  serversFor,
+} from '../domains/mcp'
 
 const dryRun = process.argv.includes('--dry-run')
 
 const sources = await loadSources()
-const managed = managedNames(sources)
+const managed = await managedNames(sources)
 const harnesses = await loadMcpAdapters()
 
 if (harnesses.length === 0) {
@@ -28,5 +33,8 @@ for (const { adapter, enable } of harnesses) {
     )
   }
 }
+
+// Only after every harness converged, so a failure leaves the old set tracked.
+if (!dryRun) await recordPinned(sources)
 
 if (dryRun && failures > 0) process.exit(1)

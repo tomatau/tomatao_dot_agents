@@ -1,4 +1,5 @@
 import type { Link } from '../lib/links'
+import type { McpTransport } from './mcp-transport'
 
 /** One personalisation source: a vault note, frontmatter stripped. */
 export interface SourceFile {
@@ -17,10 +18,10 @@ export interface PersonalisationAdapter {
   links(sources: SourceFile[]): Link[]
 }
 
-/** One MCP server to pin into a harness (an HTTP streamable endpoint). */
+/** One MCP server to pin into a harness. */
 export interface McpServer {
   name: string
-  url: string
+  transport: McpTransport
 }
 
 export type McpState =

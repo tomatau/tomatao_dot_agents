@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { applyEdits, modify, type ParseError, parse } from 'jsonc-parser'
 import { cliMcpAdapter } from './mcp-cli'
+import { type McpTransport, transportIdentity } from './mcp-transport'
 import type { McpAdapter, McpServer } from './types'
 
 /** The harness-specific half of a JSON/JSONC-file MCP adapter. */
@@ -13,8 +14,8 @@ export interface JsonMcp {
   key: string[]
   /** The entry stored under `<key>.<server-name>`. */
   entry: (server: McpServer) => Record<string, unknown>
-  /** Pull the URL back out of an entry, for diffing. */
-  urlOf: (entry: unknown) => string | undefined
+  /** Read an entry back into the shared transport model, for diffing. */
+  transportOf: (entry: unknown) => McpTransport | undefined
 }
 
 // jsonc-parser edits in place: comments, key order, and formatting survive.
@@ -58,8 +59,8 @@ export function jsonMcpAdapter(cfg: JsonMcp): McpAdapter {
     async list() {
       const found = new Map<string, string>()
       for (const [name, entry] of Object.entries(servers(await readText()))) {
-        const url = cfg.urlOf(entry)
-        if (url) found.set(name, url)
+        const transport = cfg.transportOf(entry)
+        if (transport) found.set(name, transportIdentity(transport))
       }
       return found
     },

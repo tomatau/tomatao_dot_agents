@@ -1,9 +1,10 @@
+import { transportIdentity } from './mcp-transport'
 import type { McpAdapter, McpRow, McpServer } from './types'
 
 /** The harness-specific half of a CLI-driven MCP adapter. */
 export interface CliMcp {
   name: string
-  /** Every remote server the harness has pinned, as `name -> url`. */
+  /** Every server the harness has pinned, as `name -> transport identity`. */
   list(): Promise<Map<string, string>>
   /** Pin a server; throw on failure. */
   add(server: McpServer): Promise<void>
@@ -40,11 +41,12 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
     async verify(desired, managed) {
       const have = await cli.list()
       const rows = desired.map((s) => {
-        const url = have.get(s.name)
+        const want = transportIdentity(s.transport)
+        const found = have.get(s.name)
         return row(
           s.name,
-          url === s.url ? 'ok' : url === undefined ? 'missing' : 'wrong-url',
-          url ?? s.url,
+          found === want ? 'ok' : found === undefined ? 'missing' : 'wrong-url',
+          found ?? want,
         )
       })
       for (const n of staleNames(have, desired, managed))
@@ -56,14 +58,15 @@ export function cliMcpAdapter(cli: CliMcp): McpAdapter {
       const have = await cli.list()
       const rows: McpRow[] = []
       for (const s of desired) {
-        const url = have.get(s.name)
-        if (url === s.url) {
-          rows.push(row(s.name, 'ok', s.url))
+        const want = transportIdentity(s.transport)
+        const found = have.get(s.name)
+        if (found === want) {
+          rows.push(row(s.name, 'ok', want))
           continue
         }
-        if (url !== undefined) await cli.remove(s.name)
+        if (found !== undefined) await cli.remove(s.name)
         await cli.add(s)
-        rows.push(row(s.name, url === undefined ? 'added' : 'updated', s.url))
+        rows.push(row(s.name, found === undefined ? 'added' : 'updated', want))
       }
       for (const n of staleNames(have, desired, managed)) {
         await cli.remove(n)

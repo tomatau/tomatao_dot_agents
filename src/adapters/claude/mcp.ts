@@ -1,5 +1,6 @@
 import type { McpConfig } from '../../settings/config'
 import { cliMcpAdapter } from '../mcp-cli'
+import { type McpTransport, transportIdentity } from '../mcp-transport'
 import type { McpAdapter, McpServer } from '../types'
 
 // Claude Code owns its MCP config through the `claude mcp` CLI; we never edit
@@ -8,24 +9,42 @@ export function mcp(cfg: McpConfig): McpAdapter {
   const scope = cfg.scope ?? 'user'
   const run = (args: string[]) => Bun.$`claude mcp ${args}`.quiet().nothrow()
 
+  // `claude mcp list` prints `<name>: <detail> - <status>`, where detail is a url
+  // marked `(HTTP)` or a command line. Names may contain spaces, so split on the
+  // last ` - `; connectors managed by claude.ai omit the marker and read as stdio,
+  // which is harmless because only names we manage are ever compared.
+  const parse = (line: string): [string, McpTransport] | undefined => {
+    const colon = line.indexOf(': ')
+    const dash = line.lastIndexOf(' - ')
+    if (colon === -1 || dash <= colon) return undefined
+    const name = line.slice(0, colon)
+    const detail = line.slice(colon + 2, dash).trim()
+    if (detail.endsWith(' (HTTP)')) {
+      return [name, { kind: 'http', url: detail.slice(0, -7).trim() }]
+    }
+    const [command, ...args] = detail.split(/\s+/)
+    return command ? [name, { kind: 'stdio', command, args }] : undefined
+  }
+
   return cliMcpAdapter({
     name: 'claude',
 
-    // `claude mcp list` prints `name: url (HTTP) - status` per server. Names may
-    // contain spaces. Connectors managed by claude.ai omit the `(HTTP)` marker,
-    // so requiring it keeps us to servers added through this CLI.
     async list() {
       const out = (await run(['list'])).stdout.toString()
       const found = new Map<string, string>()
       for (const line of out.split('\n')) {
-        const m = line.match(/^(.+?):\s+(\S+)\s+\(HTTP\)/)
-        if (m) found.set(m[1], m[2])
+        const parsed = parse(line)
+        if (parsed) found.set(parsed[0], transportIdentity(parsed[1]))
       }
       return found
     },
 
     async add(s: McpServer) {
-      const res = await run(['add', '-s', scope, '-t', 'http', s.name, s.url])
+      const args =
+        s.transport.kind === 'http'
+          ? ['add', '-s', scope, '-t', 'http', s.name, s.transport.url]
+          : ['add', '-s', scope, s.name, '--', s.transport.command, ...s.transport.args]
+      const res = await run(args)
       if (res.exitCode !== 0) {
         throw new Error(
           `claude mcp add ${s.name}: ${res.stderr.toString().trim()}`,

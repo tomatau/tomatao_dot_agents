@@ -26,3 +26,17 @@ export function requireUrl(
   }
   return value.replace(/\/$/, '')
 }
+
+/** An optional list of strings; absent means empty. */
+export function stringArray(
+  where: string,
+  raw: Record<string, unknown>,
+  key: string,
+): string[] {
+  const value = raw[key]
+  if (value === undefined) return []
+  if (!Array.isArray(value) || value.some((v) => typeof v !== 'string')) {
+    throw new Error(`${where}: \`${key}\` must be a list of strings`)
+  }
+  return value as string[]
+}

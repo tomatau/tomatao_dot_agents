@@ -32,6 +32,9 @@ export function bankServers(
   const base = hindsightApiUrl(hindsight.url)
   return hindsight.banks.map((bank) => ({
     name: `${id}-${bank.id}`,
-    url: `${base}${endpoint.path.replaceAll(BANK, bank.id)}`,
+    transport: {
+      kind: 'http',
+      url: `${base}${endpoint.path.replaceAll(BANK, bank.id)}`,
+    },
   }))
 }

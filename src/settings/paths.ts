@@ -5,6 +5,8 @@ export const REPO = join(import.meta.dir, '..', '..')
 export const PERSONALISATION_DIR = join(REPO, 'personalisation')
 export const SKILLS_DIR = join(REPO, 'skills')
 export const MCP_DIR = join(REPO, 'mcp')
+/** Names last pinned, so a deleted source can still be cleaned up. */
+export const MCP_STATE = join(MCP_DIR, '.state.json')
 
 export const HINDSIGHT_DIR = join(REPO, 'hindsight')
 export const HINDSIGHT_ENV_LOCAL = join(HINDSIGHT_DIR, 'env.local')

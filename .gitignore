@@ -9,3 +9,4 @@ personalisation/*
 # Machine-local vault symlinks are ignored; real source files are tracked explicitly.
 !personalisation/Shared memory.md
 .DS_Store
+mcp/.state.json
