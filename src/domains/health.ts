@@ -4,6 +4,7 @@ import { loadAdaptersConfig } from '../settings/config'
 import { SKILLS_DIR, displayPath } from '../settings/paths'
 import { checkLinks } from '../lib/links'
 import type { Row, Section } from '../lib/report'
+import { inspectBanks } from './hindsight/banks'
 import { loadSources, managedNames, serversFor } from './mcp'
 import { inspectSources, listSources } from './personalisation'
 import {
@@ -103,6 +104,11 @@ async function mcpPinRows(): Promise<Row[]> {
   return rows
 }
 
+// A pin only works if the bank behind it exists, which config alone cannot show.
+async function bankRows(): Promise<Row[]> {
+  return (await inspectBanks()).map(b => ({ state: b.state, detail: b.id }))
+}
+
 function nativeSection(harnesses: string[]): Section {
   return {
     title: 'native skills',
@@ -125,6 +131,7 @@ export async function collectSections(): Promise<Section[]> {
       await section('personalisation links', personalisationLinkRows),
       await section('skill links', skillLinkRows),
       await section('mcp pins', mcpPinRows),
+      await section('hindsight banks', bankRows),
       nativeSection(nativeSkillHarnesses(await loadAdaptersConfig())),
     ]
       // drop sections with nothing to say
