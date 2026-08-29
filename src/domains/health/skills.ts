@@ -12,7 +12,7 @@ import {
 export async function skillSourceRows(): Promise<Row[]> {
   return (await inspectSkills()).map(c => ({
     state: c.state,
-    detail: c.path,
+    detail: displayPath(c.path),
   }))
 }
 
@@ -24,7 +24,7 @@ export async function skillLinkRows(): Promise<Row[]> {
   const rows: Row[] = []
   for (const [name, links] of Object.entries(plan)) {
     for (const check of await checkLinks({ links })) {
-      rows.push({ name, state: check.state, detail: check.link.dest })
+      rows.push({ name, state: check.state, detail: displayPath(check.link.dest) })
     }
   }
   return rows
@@ -32,13 +32,12 @@ export async function skillLinkRows(): Promise<Row[]> {
 
 export function nativeSection(harnesses: string[]): Section {
   return {
-    title: 'native skills',
+    title: 'skills (native)',
     rows: harnesses.map(name => ({
       name,
       state: 'native',
       detail: `${displayPath(SKILLS_DIR)} (discovered directly)`,
     })),
-    failures: 0,
     informational: true,
   }
 }

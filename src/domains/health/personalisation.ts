@@ -2,12 +2,13 @@ import type { Row } from '../../lib/report'
 import { checkFreshness } from '../../adapters/freshness'
 import { loadPersonalisationAdapters } from '../../adapters/index'
 import { checkLinks } from '../../lib/links'
+import { displayPath } from '../../settings/paths'
 import { inspectSources, listSources } from '../personalisation'
 
 export async function personalisationSourceRows(): Promise<Row[]> {
   return (await inspectSources()).map(c => ({
     state: c.state,
-    detail: c.path,
+    detail: displayPath(c.path),
   }))
 }
 
@@ -19,7 +20,7 @@ export async function renderRows(): Promise<Row[]> {
       rows.push({
         name: check.name,
         state: check.state,
-        detail: check.distPath,
+        detail: displayPath(check.distPath),
       })
     }
   }
@@ -34,7 +35,7 @@ export async function personalisationLinkRows(): Promise<Row[]> {
       rows.push({
         name: adapter.name,
         state: check.state,
-        detail: check.link.dest,
+        detail: displayPath(check.link.dest),
       })
     }
   }
