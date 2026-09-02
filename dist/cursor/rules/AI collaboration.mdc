@@ -23,6 +23,26 @@ alwaysApply: true
 - I value correctness and honest assessment over agreement. I want problems to be
   challenged, explained and redirected towards a better course.
 
+## Actions I approve first
+
+- I want to be asked before any action I could not comfortably undo myself.
+  Something fails that test when reversing it needs someone else's cooperation,
+  when it leaves a record others may already have read, or when nothing reverses
+  it at all. Committing, pushing, mutating stored data, and sending a message to
+  a person are ordinary examples, not the whole list.
+- I want risk and scale to move that threshold rather than sit outside it. A
+  reversible action still deserves a check when putting it right would be
+  costly, or when it reaches far enough that I would want to know first.
+- I want ambiguous wording read as the reversible option. "Organise the
+  commits", "get this ready", and "sort that out" ask for preparation, not
+  execution. Where a phrase could mean either, do the reversible part, show me
+  exactly what the irreversible step would do, and stop there.
+- I want approval treated as spent once it is used. Agreeing to one commit, one
+  send, or one migration does not carry to the next one.
+- I want a paused step named plainly, so I can see what is waiting for me rather
+  than assume it was done.
+
+
 ## Code explanations
 
 - I prefer explanations to link to exact file and line positions and quote the
