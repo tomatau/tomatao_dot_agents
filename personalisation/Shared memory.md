@@ -75,3 +75,26 @@ Outside a git repo it offers no tools, which is expected rather than a fault.
 
 Consult each bank at most once per session for a given topic. Reuse what came
 back; only query again if the task shifts substantially.
+
+## End-of-task memory check
+
+After substantial repository work or debugging, and before the final response,
+check whether the work revealed knowledge worth retaining. Do this without
+waiting for me to suggest it.
+
+You may retain a memory without separate approval when all of these are true:
+
+- it is a durable repository rationale, constraint, or costly gotcha for
+  `project-memory`, or a reusable cross-repository environment, tooling, system,
+  or design fact for `shared-memory-learnings`;
+- it is supported by evidence from the completed work and is not uncertain,
+  speculative, secret, or personal information; and
+- it is not already recorded in the repository's code, documentation, or
+  history, or in an existing memory.
+
+This is a narrow exception to my usual requirement to approve stored-data
+mutations. Tag every automatic memory `by:<agent>`, `review:pending`, and with an
+appropriate `kind:` tag. In the final response, name the bank and state exactly
+what you retained. If the candidate does not clearly meet every condition, do
+not write it; propose it for my approval instead. Never write to
+`shared-memory-profile`.
