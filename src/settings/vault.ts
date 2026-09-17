@@ -6,6 +6,8 @@ const WHERE = configWhere(VAULT_YML)
 export interface VaultConfig {
   /** Vault-relative path to the note declaring what is in sync scope. */
   syncConfig: string
+  /** Vault-relative path to the note declaring what is searchable. */
+  searchConfig: string
 }
 
 export function vaultDir(): string {
@@ -20,5 +22,8 @@ export function vaultDir(): string {
 
 export async function loadVaultConfig(): Promise<VaultConfig> {
   const raw = asRecord(WHERE, (await readConfigYaml(VAULT_YML)) ?? {})
-  return { syncConfig: requireString(WHERE, raw, 'syncConfig') }
+  return {
+    syncConfig: requireString(WHERE, raw, 'syncConfig'),
+    searchConfig: requireString(WHERE, raw, 'searchConfig'),
+  }
 }

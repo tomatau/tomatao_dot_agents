@@ -7,7 +7,7 @@ claude:
       target: skills/
   mcp:
     scope: user
-    enable: [shared-memory, project-memory]
+    enable: [shared-memory, project-memory, leann]
 
 codex:
   personalisation:
@@ -16,7 +16,7 @@ codex:
   skills: native
   mcp:
     home: '~/.codex'
-    enable: [shared-memory, project-memory]
+    enable: [shared-memory, project-memory, leann]
 
 opencode:
   personalisation:
@@ -25,7 +25,7 @@ opencode:
   skills: native
   mcp:
     file: '~/.config/opencode/opencode.jsonc'
-    enable: [shared-memory, project-memory]
+    enable: [shared-memory, project-memory, leann]
 
 zed:
   personalisation:
@@ -34,7 +34,7 @@ zed:
   skills: native
   mcp:
     file: '~/.config/zed/settings.json'
-    enable: [shared-memory, project-memory]
+    enable: [shared-memory, project-memory, leann]
 
 cursor:
   personalisation:
@@ -45,7 +45,7 @@ cursor:
       target: skills/
   mcp:
     file: '~/.cursor/mcp.json'
-    enable: [shared-memory, project-memory]
+    enable: [shared-memory, project-memory, leann]
 
 warp:
   personalisation:
@@ -53,4 +53,4 @@ warp:
       target: dist/warp/AGENTS.md
   mcp:
     file: '~/.warp/.mcp.json'
-    enable: [shared-memory, project-memory]
+    enable: [shared-memory, project-memory, leann]

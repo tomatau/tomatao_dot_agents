@@ -4,6 +4,7 @@ hindsight/env.local
 hindsight/codex-home/
 hindsight/*.plist
 hindsight/.sync-cache.json
+leann/
 personalisation/*
 !personalisation/.gitkeep
 # Machine-local vault symlinks are ignored; real source files are tracked explicitly.

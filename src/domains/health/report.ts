@@ -8,6 +8,7 @@ import {
   personalisationSourceRows,
   renderRows,
 } from './personalisation'
+import { searchIndexRows } from './search'
 import { nativeSection, skillLinkRows, skillSourceRows } from './skills'
 
 // Doctor must report on broken wiring, never crash because of it.
@@ -27,8 +28,10 @@ async function section(
 export async function collectSections(sources: McpSources): Promise<Section[]> {
   return (
     [
-      // memory: a pin means nothing until the bank behind it exists
+      // what a pin reaches for, before the pins themselves: a bank that does
+      // not exist and an index that cannot be proven fresh both make one moot
       await section('hindsight banks', bankRows),
+      await section('search indexes', searchIndexRows),
       await section('mcp pins', () => mcpPinRows(sources)),
 
       // personalisation: source note → rendered file → link into the harness

@@ -21,7 +21,8 @@ concern live in its topic doc ([personalisation](personalisation.md),
 │   ├── adapters/    # per-harness content shaping
 │   └── entries/     # thin command entrypoints
 ├── docs/            # these documents
-└── hindsight/       # memory service runtime files, machine-local
+├── hindsight/       # memory service runtime files, machine-local
+└── leann/           # search index runtime files, machine-local
 ```
 
 ## Root

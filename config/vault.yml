@@ -1,1 +1,2 @@
 syncConfig: '_system/config/memory-sync.yml'
+searchConfig: '_system/config/search-sync.yml'

@@ -27,11 +27,15 @@ doctor:
     bun src/entries/doctor.ts
 
 [group('sync')]
-sync: sync-personalisation link-skills banks mcp
+sync: sync-personalisation link-skills banks mcp (search-sync "--if-stale")
 
 [group('sync')]
 sync-profile *args:
     bun src/entries/sync-profile.ts {{args}}
+
+[group('sync')]
+search-sync *args:
+    bun src/entries/search-sync.ts {{args}}
 
 [group('sync')]
 banks:

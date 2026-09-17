@@ -1,0 +1,3 @@
+# Local semantic retrieval shared by agent harnesses. Index scope and refresh
+# belong to each adopted use case; this server only exposes existing indexes.
+command: '{repo}/mcp/leann-mcp.sh'

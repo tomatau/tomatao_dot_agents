@@ -25,3 +25,4 @@ See [docs/directory-structure.md](docs/directory-structure.md).
 | [directory-structure](docs/directory-structure.md) | what lives where, built vs planned                      |
 | [personalisation](docs/personalisation.md)         | how personalisation flows from Obsidian to each harness |
 | [memory-strategy](docs/memory-strategy.md)         | shared agent memory plan (not yet built)                |
+| [leann](docs/leann.md)                             | local semantic retrieval and its first vault use case   |
