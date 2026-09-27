@@ -4,4 +4,6 @@
 set -eu
 PATH="$HOME/.local/bin:$PATH"
 export PATH
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$script_dir/../leann"
 exec "$HOME/.local/bin/leann_mcp"
