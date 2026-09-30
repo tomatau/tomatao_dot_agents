@@ -28,6 +28,9 @@ export async function buildIndex(req: BuildRequest): Promise<void> {
     '--embedding-model',
     req.embeddingModel,
     '--force',
+    // Snapshot creation scans parent folders, so restrict that scan to notes too.
+    '--file-types',
+    '.md',
     // Last, so the file list cannot swallow a following flag.
     '--docs',
     ...req.files,
