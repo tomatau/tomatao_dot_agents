@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import type { McpServer } from '../lib/mcp'
 import type { McpConfig } from '../settings/mcp'
 import type { McpAdapter, McpState } from './types'
+import { mcp as antigravity } from './antigravity/mcp'
 import { mcp as cursor } from './cursor/mcp'
 import { mcp as opencode } from './opencode/mcp'
 import { mcp as zed } from './zed/mcp'
@@ -31,6 +32,13 @@ const harnesses: [
   Record<string, unknown>,
   Record<string, unknown>,
 ][] = [
+  [
+    'antigravity',
+    antigravity,
+    'mcpServers',
+    { url: 'http://127.0.0.1:8888/mcp/profile/' },
+    { command: 'bun', args: ['bridge.ts', '--path', '/mcp/'] },
+  ],
   [
     'cursor',
     cursor,

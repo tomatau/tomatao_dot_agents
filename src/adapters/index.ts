@@ -1,6 +1,8 @@
 import type { HarnessConfig } from '../settings/adapters'
 import type { McpAdapter, PersonalisationAdapter } from './types'
 import { loadAdaptersConfig } from '../settings/adapters'
+import { mcp as antigravityMcp } from './antigravity/mcp'
+import { personalisation as antigravity } from './antigravity/personalisation'
 import { mcp as claudeMcp } from './claude/mcp'
 import { personalisation as claude } from './claude/personalisation'
 import { mcp as codexMcp } from './codex/mcp'
@@ -19,6 +21,7 @@ export async function loadPersonalisationAdapters(): Promise<
 > {
   const config = await loadAdaptersConfig()
   return [
+    antigravity(config.antigravity?.personalisation ?? []),
     claude(config.claude?.personalisation ?? []),
     codex(config.codex?.personalisation ?? []),
     opencode(config.opencode?.personalisation ?? []),
@@ -32,6 +35,7 @@ const MCP: Record<
   string,
   (cfg: NonNullable<HarnessConfig['mcp']>) => McpAdapter
 > = {
+  antigravity: antigravityMcp,
   claude: claudeMcp,
   codex: codexMcp,
   opencode: opencodeMcp,

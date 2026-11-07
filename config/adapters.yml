@@ -54,3 +54,12 @@ warp:
   mcp:
     file: '~/.warp/.mcp.json'
     enable: [shared-memory, project-memory, leann]
+
+antigravity:
+  personalisation:
+    - dest: '~/.gemini/config/AGENTS.md'
+      target: dist/antigravity/AGENTS.md
+  skills: native
+  mcp:
+    file: '~/.gemini/config/mcp_config.json'
+    enable: [shared-memory, project-memory, leann]

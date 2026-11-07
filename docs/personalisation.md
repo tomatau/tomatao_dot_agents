@@ -35,13 +35,16 @@ Everything behavioural lives in `src/adapters/<harness>.ts`.
 
 ## Harness targets
 
-| Harness             | Destination                    | Behaviour              |
-| ------------------- | ------------------------------ | ---------------------- |
-| claude              | `~/.claude/CLAUDE.md`          | aggregate              |
-| codex               | `~/.codex/AGENTS.md`           | aggregate              |
-| opencode            | `~/.config/opencode/AGENTS.md` | aggregate              |
-| cursor              | `~/.cursor/rules/<name>.mdc`   | 1:1 rules              |
-| warp / zed / hermes | —                              | stubs, not implemented |
+| Harness     | Destination                    | Behaviour             |
+| ----------- | ------------------------------ | --------------------- |
+| antigravity | `~/.gemini/config/AGENTS.md`   | aggregate             |
+| claude      | `~/.claude/CLAUDE.md`          | aggregate             |
+| codex       | `~/.codex/AGENTS.md`           | aggregate             |
+| opencode    | `~/.config/opencode/AGENTS.md` | aggregate             |
+| zed         | `~/.config/zed/AGENTS.md`      | aggregate             |
+| cursor      | `~/.cursor/rules/<name>.mdc`   | 1:1 rules             |
+| warp        | `~/.agents/AGENTS.md`          | aggregate             |
+| hermes      | —                              | stub, not implemented |
 
 ## Commands
 
