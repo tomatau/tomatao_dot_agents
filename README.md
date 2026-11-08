@@ -8,10 +8,15 @@ configuration stays in each tool's own home.
 
 ```sh
 bun install                 # bun 1.3.13 pinned via .prototools
+just bootstrap              # set this machine up: harnesses, memory, links
 just                        # list commands
-just sync-personalisation   # render + symlink personalisation into harnesses
+just sync                   # converge everything this machine can
 just doctor                 # verify wiring across harnesses
 ```
+
+Configure `hindsight/env.local` from `hindsight/env.example` before setup.
+Preview with `just bootstrap --dry-run`. See [machine setup](docs/bootstrap.md)
+for harness selection, remotes, and chezmoi use.
 
 ## Layout
 
@@ -21,6 +26,7 @@ See [docs/directory-structure.md](docs/directory-structure.md).
 
 | Doc                                                | Covers                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
+| [machine setup](docs/bootstrap.md)                 | first setup, customisation, and dry runs                |
 | [principles](docs/principles.md)                   | the four rules everything here obeys                    |
 | [directory-structure](docs/directory-structure.md) | what lives where, built vs planned                      |
 | [personalisation](docs/personalisation.md)         | how personalisation flows from Obsidian to each harness |

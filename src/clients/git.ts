@@ -1,26 +1,81 @@
-import { dirname } from 'node:path'
+import { run } from '../lib/shell'
 
-const run = async (
+/**
+ * The repository this one is a copy of. A checkout that names it as upstream
+ * holds a reference; one that names it `origin` holds its own working copy,
+ * which is what a checkout already in place here is.
+ */
+export const CANONICAL_REMOTE = 'git@github.com:tomatau/tomatao_dot_agents.git'
+
+export interface Remote {
+  name: string
+  url: string
+}
+
+async function git(args: string[]): Promise<string> {
+  const { code, stdout, stderr } = await run(['git', ...args])
+  if (code !== 0) throw new Error(stderr.trim() || `git ${args[0]} failed`)
+  return stdout.trim()
+}
+
+/** Every remote in the repo at `cwd`, in the order git lists them. */
+export async function remotes(cwd: string): Promise<Remote[]> {
+  const seen = new Map<string, string>()
+  for (const line of (await git(['-C', cwd, 'remote', '-v']))
+    .split('\n')
+    .filter(Boolean)) {
+    const [name, url, kind] = line.split(/\s+/)
+    if (kind === '(fetch)' && !seen.has(name)) seen.set(name, url)
+  }
+  return [...seen].map(([name, url]) => ({ name, url }))
+}
+
+/** Point an existing remote at another url. */
+export async function setRemoteUrl(
   cwd: string,
-  args: string[],
-): Promise<string | undefined> => {
-  const res = await Bun.$`git ${args}`.cwd(cwd).quiet().nothrow()
-  if (res.exitCode !== 0) return undefined
-  const out = res.stdout.toString().trim()
-  return out || undefined
+  name: string,
+  url: string,
+): Promise<void> {
+  await git(['-C', cwd, 'remote', 'set-url', name, url])
 }
 
-/** The work tree containing `cwd`, or undefined outside a repo. */
+/** Add a remote, for a copy that keeps its settings apart from the reference. */
+export async function addRemote(
+  cwd: string,
+  name: string,
+  url: string,
+): Promise<void> {
+  await git(['-C', cwd, 'remote', 'add', name, url])
+}
+
+/** Move a remote under another name, leaving the url alone. */
+export async function renameRemote(
+  cwd: string,
+  from: string,
+  to: string,
+): Promise<void> {
+  await git(['-C', cwd, 'remote', 'rename', from, to])
+}
+
+/** Drop a remote, for undoing a rename that was not wanted after all. */
+export async function removeRemote(cwd: string, name: string): Promise<void> {
+  await git(['-C', cwd, 'remote', 'remove', name])
+}
+
+/** The repository containing `cwd`, or nothing when there is none. */
 export async function repoRoot(cwd: string): Promise<string | undefined> {
-  return run(cwd, ['rev-parse', '--show-toplevel'])
+  const { code, stdout } = await run([
+    'git',
+    '-C',
+    cwd,
+    'rev-parse',
+    '--show-toplevel',
+  ])
+  return code === 0 && stdout.trim() ? stdout.trim() : undefined
 }
 
-/** The fetch URL of `origin`, or of the only remote when it is named otherwise. */
+/** The fetch URL of origin, falling back to the first remote when origin is absent. */
 export async function repoRemote(root: string): Promise<string | undefined> {
-  const origin = await run(root, ['remote', 'get-url', 'origin'])
-  if (origin) return origin
-  const first = (await run(root, ['remote']))?.split('\n')[0]
-  return first ? run(root, ['remote', 'get-url', first]) : undefined
+  const seen = await remotes(root)
+  return (seen.find(remote => remote.name === 'origin') ?? seen[0])?.url
 }
-
-export { dirname }

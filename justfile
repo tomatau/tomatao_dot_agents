@@ -22,12 +22,21 @@ link-skills:
 test *args:
     bun test {{args}}
 
+[group('setup')]
+bootstrap *args:
+    bun src/entries/bootstrap.ts {{args}}
+
+[group('setup')]
+memory *args:
+    bun src/entries/memory.ts {{args}}
+
 [group('health')]
 doctor:
     bun src/entries/doctor.ts
 
 [group('sync')]
-sync: sync-personalisation link-skills banks mcp (search-sync "--if-stale")
+sync:
+    bun src/entries/sync.ts
 
 [group('sync')]
 sync-profile *args:

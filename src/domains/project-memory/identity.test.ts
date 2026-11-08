@@ -83,3 +83,24 @@ describe('naming a repo', () => {
     expect(await projectBankId(clone)).toBe(await projectBankId(original))
   })
 })
+
+test('renaming origin preserves the project bank', async () => {
+  const repo = await makeRepo(
+    'renamed-remote',
+    'git@github.com:acme/stable.git',
+  )
+  const before = await projectBankId(repo)
+  await Bun.$`git remote rename origin upstream`.cwd(repo).quiet()
+  expect(await projectBankId(repo)).toBe(before)
+})
+
+test('origin remains the identity when other remotes exist', async () => {
+  const repo = await makeRepo(
+    'multiple-remotes',
+    'git@github.com:acme/primary.git',
+  )
+  await Bun.$`git remote add another git@github.com:acme/secondary.git`
+    .cwd(repo)
+    .quiet()
+  expect(await projectBankId(repo)).toBe('project-github-com-acme-primary')
+})
