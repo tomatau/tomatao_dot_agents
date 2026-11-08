@@ -26,22 +26,6 @@ export function hindsightInstalledPlist(): string {
   return join(homedir(), 'Library/LaunchAgents', HINDSIGHT_PLIST_NAME)
 }
 
-/**
- * Hindsight API base URL: `HINDSIGHT_API_URL`, else `HINDSIGHT_API_HOST`/`_PORT`,
- * else the `url` from config/hindsight.yml that the caller passes in.
- */
-export function hindsightApiUrl(configured: string): string {
-  const explicit = process.env.HINDSIGHT_API_URL?.trim()
-  if (explicit) return explicit.replace(/\/$/, '')
-  // A half-set env overrides only its half; the rest comes from `configured`.
-  const base = new URL(configured)
-  const host = process.env.HINDSIGHT_API_HOST?.trim()
-  const port = process.env.HINDSIGHT_API_PORT?.trim()
-  if (host) base.hostname = host
-  if (port) base.port = port
-  return base.origin
-}
-
 export function displayPath(path: string): string {
   const home = homedir()
   return path.startsWith(home) ? `~${path.slice(home.length)}` : path

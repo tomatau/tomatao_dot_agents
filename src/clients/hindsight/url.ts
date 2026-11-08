@@ -1,5 +1,4 @@
-import { loadHindsightConfig } from '../../settings/hindsight'
-import { hindsightApiUrl } from '../../settings/paths'
+import { hindsightApiUrl, loadHindsightConfig } from '../../settings/hindsight'
 
 // Read once: every call in a run resolves the same base URL.
 let base: Promise<string> | undefined

@@ -1,8 +1,7 @@
 import type { McpResolver, McpServer } from '../../lib/mcp'
 import type { HindsightConfig } from '../../settings/hindsight'
 import { requireString } from '../../lib/parse'
-import { loadHindsightConfig } from '../../settings/hindsight'
-import { hindsightApiUrl } from '../../settings/paths'
+import { hindsightApiUrl, loadHindsightConfig } from '../../settings/hindsight'
 
 /** How an MCP client reaches a bank, from `mcp/<id>.yml`. */
 export interface BankEndpoint {
