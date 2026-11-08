@@ -1,7 +1,10 @@
-import { readdir, readFile, readlink, stat } from 'node:fs/promises'
-import { basename, extname, join } from 'node:path'
+import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
+import { basename, dirname, extname, join } from 'node:path'
 import type { SourceFile } from '../adapters/types'
-import { PERSONALISATION_DIR } from '../settings/paths'
+import { loadPersonalisationAdapters } from '../adapters/index'
+import { loadDeclaredHarnesses } from '../settings/adapters'
+import { PERSONALISATION_DIR, REPO } from '../settings/paths'
+import { personalisationDestinations, reconcileLinks } from './reconcile'
 
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n/
 
@@ -40,7 +43,7 @@ export async function inspectSources(): Promise<SourceCheck[]> {
       const path = join(PERSONALISATION_DIR, entry.name)
       if (entry.isSymbolicLink()) {
         try {
-          await stat(await readlink(path))
+          await stat(path)
           return { name: entry.name, path, state: 'ok' }
         } catch {
           return { name: entry.name, path, state: 'broken-link' }
@@ -51,4 +54,34 @@ export async function inspectSources(): Promise<SourceCheck[]> {
       return { name: entry.name, path, state: 'foreign-file' }
     }),
   )
+}
+
+/** A source that says nothing decides nothing, so bootstrap asks for its content. */
+export function isEmptySource({ content }: SourceFile): boolean {
+  return content.trim().length === 0
+}
+
+export async function renderPersonalisation(): Promise<void> {
+  const sources = await listSources()
+  for (const adapter of await loadPersonalisationAdapters()) {
+    for (const file of adapter.render(sources)) {
+      await mkdir(dirname(file.distPath), { recursive: true })
+      await writeFile(file.distPath, file.content)
+      console.log(`rendered     ${file.distPath}`)
+    }
+  }
+}
+
+export async function linkPersonalisation(): Promise<void> {
+  const sources = await listSources()
+  const adapters = await loadPersonalisationAdapters()
+  const wanted = adapters.flatMap(a => a.links(sources))
+
+  // A harness switched off here keeps its declaration but gives up its links,
+  // so the file nothing renders any more does not stay wired up.
+  await reconcileLinks({
+    destinations: personalisationDestinations(await loadDeclaredHarnesses()),
+    wanted,
+    ownedRoot: REPO,
+  })
 }

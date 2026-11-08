@@ -1,8 +1,10 @@
-import { access, readdir } from 'node:fs/promises'
+import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { AdaptersConfig, HarnessLinks } from '../settings/adapters'
 import { stripTrailingSlash } from '../lib/path'
-import { SKILLS_DIR } from '../settings/paths'
+import { loadAdaptersConfig, loadDeclaredHarnesses } from '../settings/adapters'
+import { REPO, SKILLS_DIR } from '../settings/paths'
+import { skillDestinations, reconcileLinks } from './reconcile'
 
 /** Harnesses that mirror `skills/`, mapped to their base link. */
 export function skillLinks(config: AdaptersConfig): HarnessLinks {
@@ -61,11 +63,29 @@ export async function inspectSkills(): Promise<SkillCheck[]> {
     (await listSkills()).map(async name => {
       const path = join(SKILLS_DIR, name, 'SKILL.md')
       try {
-        await access(path)
+        await stat(path)
         return { name, path, state: 'ok' }
       } catch {
         return { name, path, state: 'missing-skill-md' }
       }
     }),
   )
+}
+
+export async function linkSkills(): Promise<void> {
+  const skills = await listSkills()
+  const enabled = await loadAdaptersConfig()
+
+  // What this machine wants: only enabled harnesses, only skills still present.
+  const wanted = Object.values(
+    planSkillLinks({ config: skillLinks(enabled), skills }),
+  ).flat()
+
+  // A harness switched off here, or a skill that has been deleted, leaves a link
+  // behind that nothing points at any more, so it is given up rather than kept.
+  await reconcileLinks({
+    destinations: skillDestinations(await loadDeclaredHarnesses()),
+    wanted,
+    ownedRoot: REPO,
+  })
 }

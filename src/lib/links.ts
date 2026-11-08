@@ -1,12 +1,18 @@
 import { lstat, mkdir, readlink, symlink, unlink } from 'node:fs/promises'
-import { dirname } from 'node:path'
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 
 export interface Link {
   dest: string
   target: string
 }
 
-export type LinkState = 'ok' | 'missing' | 'wrong-target' | 'foreign-file'
+export type LinkState =
+  | 'ok'
+  | 'missing'
+  | 'wrong-target'
+  | 'foreign-file'
+  /** A symlink into this repo to something the repo no longer puts here. */
+  | 'unwanted'
 
 export type EnforceResult = 'ok' | 'linked' | 'retargeted'
 
@@ -37,11 +43,11 @@ export function classifyLink({
   return observed.target === expectedTarget ? 'ok' : 'wrong-target'
 }
 
-async function observeLink(link: Link): Promise<LinkObservation> {
+async function observeLink(dest: string): Promise<LinkObservation> {
   try {
-    const st = await lstat(link.dest)
+    const st = await lstat(dest)
     if (!st.isSymbolicLink()) return { kind: 'file' }
-    return { kind: 'symlink', target: await readlink(link.dest) }
+    return { kind: 'symlink', target: await readlink(dest) }
   } catch {
     return { kind: 'missing' }
   }
@@ -52,7 +58,7 @@ export async function inspectLinks({
 }: {
   links: Link[]
 }): Promise<LinkObservation[]> {
-  return Promise.all(links.map(observeLink))
+  return Promise.all(links.map(link => observeLink(link.dest)))
 }
 
 export async function checkLinks({
@@ -70,12 +76,45 @@ export async function checkLinks({
   }))
 }
 
-async function ensureOne(link: Link): Promise<EnforceResult> {
+export { observeLink as inspectLink }
+
+/** Resolve relative link targets before checking directory containment, even for broken links. */
+export function isOwnedLink(
+  observed: LinkObservation,
+  { dest, ownedRoot }: { dest: string; ownedRoot: string },
+): observed is Extract<LinkObservation, { kind: 'symlink' }> {
+  if (observed.kind !== 'symlink') return false
+  const within = relative(
+    resolve(ownedRoot),
+    resolve(dirname(dest), observed.target),
+  )
+  return (
+    within !== '..' && !within.startsWith(`..${sep}`) && !isAbsolute(within)
+  )
+}
+
+/** Recheck ownership at the point of removal; foreign links and real files stay untouched. */
+export async function retireLink({
+  dest,
+  ownedRoot,
+}: {
+  dest: string
+  ownedRoot: string
+}): Promise<'ok' | 'removed'> {
+  const observed = await observeLink(dest)
+  if (!isOwnedLink(observed, { dest, ownedRoot })) return 'ok'
+  await unlink(dest)
+  return 'removed'
+}
+
+export async function ensureLink({
+  link,
+}: {
+  link: Link
+}): Promise<EnforceResult> {
   await mkdir(dirname(link.dest), { recursive: true })
-  const state = classifyLink({
-    expectedTarget: link.target,
-    observed: await observeLink(link),
-  })
+  const observed = await observeLink(link.dest)
+  const state = classifyLink({ expectedTarget: link.target, observed })
   if (state === 'ok') return 'ok'
   if (state === 'foreign-file')
     throw new Error(`refusing to replace non-symlink ${link.dest}`)
@@ -89,6 +128,6 @@ export async function ensureLinks({
 }: {
   links: Link[]
 }): Promise<EnforcedLink[]> {
-  const results = await Promise.all(links.map(ensureOne))
+  const results = await Promise.all(links.map(link => ensureLink({ link })))
   return links.map((link, i) => ({ link, result: results[i] }))
 }

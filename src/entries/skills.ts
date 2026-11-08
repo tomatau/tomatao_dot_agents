@@ -1,16 +1,8 @@
-import { listSkills, planSkillLinks, skillLinks } from '../domains/skills'
-import { ensureLinks } from '../lib/links'
-import { loadAdaptersConfig } from '../settings/adapters'
+import { linkSkills } from '../domains/skills'
 
-const skillPlan = planSkillLinks({
-  config: skillLinks(await loadAdaptersConfig()),
-  skills: await listSkills(),
-})
-
-for (const [harness, links] of Object.entries(skillPlan)) {
-  for (const enforced of await ensureLinks({ links })) {
-    console.log(
-      `${harness.padEnd(9)}${enforced.result.padEnd(13)}${enforced.link.dest}`,
-    )
-  }
+try {
+  await linkSkills()
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error))
+  process.exitCode = 1
 }
