@@ -1,4 +1,4 @@
-import { bold, cyan, dim, terminalWidth } from './colour'
+import { bold, cyan, dim, fitColumns, terminalWidth } from './colour'
 
 /** One selectable row; `detail` is what it would wire up, shown dimmed. */
 export interface Choice {
@@ -94,7 +94,6 @@ class CheckList<T extends Choice> {
   private cursor = 0
   private readonly picked: Set<number>
   private drawn = 0
-  private stop: () => void = () => {}
 
   constructor(
     private readonly question: string,
@@ -107,20 +106,23 @@ class CheckList<T extends Choice> {
   }
 
   private width(): number {
-    return terminalWidth() - 2
+    // Leave the terminal’s final column unused to avoid automatic wrapping.
+    return Math.max(0, terminalWidth() - 3)
   }
 
-  private rule(edge: string): string {
-    return `${cyan(edge)}${dim('─'.repeat(this.width()))}${cyan(edge)}`
+  private rule(left: string, right: string): string {
+    return `${cyan(left)}${dim('─'.repeat(this.width()))}${cyan(right)}`
   }
 
   private line(text: string): string {
     // A row longer than the frame would break the right edge; trim to fit.
-    return `${cyan('│')}${text.slice(0, this.width()).padEnd(this.width())}${cyan('│')}`
+    return `${cyan('│')}${fitColumns(text, this.width())}${cyan('│')}`
   }
 
   private frame(): string[] {
-    const labelWidth = Math.max(...this.options.map(o => o.label.length))
+    const labelWidth = Math.max(
+      ...this.options.map(o => Bun.stringWidth(o.label)),
+    )
     const first = Math.min(
       Math.max(this.cursor - Math.floor(WINDOW / 2), 0),
       Math.max(this.options.length - WINDOW, 0),
@@ -129,34 +131,33 @@ class CheckList<T extends Choice> {
       const index = first + i
       const here = index === this.cursor
       const mark = this.picked.has(index) ? bold('[x]') : '[ ]'
-      const name = here ? bold(option.label) : option.label
+      const padded = fitColumns(option.label, labelWidth)
+      const name = here ? bold(padded) : padded
       const detail = option.detail ? `  ${dim(option.detail)}` : ''
-      return this.line(
-        `  ${here ? cyan('▸') : ' '} ${mark} ${name.padEnd(labelWidth)}${detail}`,
-      )
+      return this.line(`  ${here ? cyan('▸') : ' '} ${mark} ${name}${detail}`)
     })
     const count = `${this.picked.size}/${this.options.length}`
     return [
-      this.rule('┌'),
+      this.rule('┌', '┐'),
       ...rows,
       this.line(''),
       this.line(`  ${dim(count)}`),
       this.line(
         `  ${dim('↑/↓ move   space toggle   enter confirm   q cancel')}`,
       ),
-      this.rule('└'),
+      this.rule('└', '┘'),
     ]
   }
 
   private paint(): void {
     const lines = this.frame()
-    process.stdout.write(lines.join('\n'))
+    process.stdout.write(`${lines.join('\r\n')}\r\n`)
     this.drawn = lines.length
   }
 
   private erase(): void {
     if (this.drawn === 0) return
-    process.stdout.write(`\x1b[${this.drawn}A\x1b[J`)
+    process.stdout.write(`\r\x1b[${this.drawn}A\x1b[J`)
     this.drawn = 0
   }
 
@@ -173,11 +174,6 @@ class CheckList<T extends Choice> {
         input.setRawMode?.(false)
         input.pause()
         input.off('data', onData)
-        this.stop = () => {}
-      }
-      this.stop = () => {
-        finish()
-        process.stdout.write('\n')
       }
       const onData = (key: string): void => {
         if (key === '\u0003' || key === 'q') {

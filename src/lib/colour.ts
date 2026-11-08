@@ -26,3 +26,13 @@ export const cyan = style(36, 39)
 export function terminalWidth(max = 76): number {
   return Math.min(process.stdout.columns || max, max)
 }
+
+/** Fit styled text to terminal columns without splitting escape sequences or wide characters. */
+export function fitColumns(text: string, width: number): string {
+  let end = width
+  let clipped = Bun.sliceAnsi(text, 0, end)
+  // Bun 1.3.13 includes a wide character that straddles the slice boundary.
+  while (Bun.stringWidth(clipped) > width)
+    clipped = Bun.sliceAnsi(text, 0, --end)
+  return clipped + ' '.repeat(Math.max(0, width - Bun.stringWidth(clipped)))
+}
