@@ -11,6 +11,8 @@ import { mcp as cursorMcp } from './cursor/mcp'
 import { personalisation as cursor } from './cursor/personalisation'
 import { mcp as opencodeMcp } from './opencode/mcp'
 import { personalisation as opencode } from './opencode/personalisation'
+import { mcp as piMcp } from './pi/mcp'
+import { personalisation as pi } from './pi/personalisation'
 import { mcp as warpMcp } from './warp/mcp'
 import { personalisation as warp } from './warp/personalisation'
 import { mcp as zedMcp } from './zed/mcp'
@@ -28,6 +30,7 @@ export async function loadPersonalisationAdapters(): Promise<
     zed(config.zed?.personalisation ?? []),
     cursor(config.cursor?.personalisation ?? []),
     warp(config.warp?.personalisation ?? []),
+    pi(config.pi?.personalisation ?? []),
   ]
 }
 
@@ -42,6 +45,7 @@ const MCP: Record<
   zed: zedMcp,
   cursor: cursorMcp,
   warp: warpMcp,
+  pi: piMcp,
 }
 
 /** A harness's MCP adapter, with the source ids it opted in to. */

@@ -63,3 +63,12 @@ antigravity:
   mcp:
     file: '~/.gemini/config/mcp_config.json'
     enable: [shared-memory, project-memory, leann]
+
+pi:
+  personalisation:
+    - dest: '~/.pi/agent/AGENTS.md'
+      target: dist/pi/AGENTS.md
+  skills: native
+  mcp:
+    file: '~/.pi/agent/mcp.json'
+    enable: [shared-memory, project-memory, leann]

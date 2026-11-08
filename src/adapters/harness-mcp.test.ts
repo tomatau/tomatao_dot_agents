@@ -8,6 +8,7 @@ import type { McpAdapter, McpState } from './types'
 import { mcp as antigravity } from './antigravity/mcp'
 import { mcp as cursor } from './cursor/mcp'
 import { mcp as opencode } from './opencode/mcp'
+import { mcp as pi } from './pi/mcp'
 import { mcp as zed } from './zed/mcp'
 
 const remote: McpServer = {
@@ -59,6 +60,13 @@ const harnesses: [
     'mcp',
     { type: 'remote', url: 'http://127.0.0.1:8888/mcp/profile/' },
     { type: 'local', command: ['bun', 'bridge.ts', '--path', '/mcp/'] },
+  ],
+  [
+    'pi',
+    pi,
+    'mcpServers',
+    { url: 'http://127.0.0.1:8888/mcp/profile/' },
+    { command: 'bun', args: ['bridge.ts', '--path', '/mcp/'] },
   ],
 ]
 

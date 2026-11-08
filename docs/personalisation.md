@@ -43,6 +43,7 @@ Everything behavioural lives in `src/adapters/<harness>.ts`.
 | opencode    | `~/.config/opencode/AGENTS.md` | aggregate             |
 | zed         | `~/.config/zed/AGENTS.md`      | aggregate             |
 | cursor      | `~/.cursor/rules/<name>.mdc`   | 1:1 rules             |
+| pi          | `~/.pi/agent/AGENTS.md`        | aggregate             |
 | warp        | `~/.agents/AGENTS.md`          | aggregate             |
 | hermes      | —                              | stub, not implemented |
 
