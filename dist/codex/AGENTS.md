@@ -125,6 +125,16 @@ gotcha that cost you time. Same tags as learnings.
 
 Outside a git repo it offers no tools, which is expected rather than a fault.
 
+## When sources disagree
+
+Follow the first of these that speaks to the decision:
+
+1. What I ask for in this session.
+2. The repository's own instructions.
+3. `shared-memory-profile`.
+4. `project-memory` and `shared-memory-learnings`.
+5. Your own assumptions.
+
 ## Caching within a session
 
 Consult each bank at most once per session for a given topic. Reuse what came
