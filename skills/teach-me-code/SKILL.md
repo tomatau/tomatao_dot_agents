@@ -18,11 +18,19 @@ Pick the first that yields content:
 3. Branch commits — diff against merge-base with the default branch
    (`git log --oneline $(git merge-base HEAD <default>)..HEAD`)
 
-If nothing yields content, ask what to explore instead of guessing.
+If I name a scope (a PR, a commit range, a path), use that instead. If nothing
+yields content, ask what to explore instead of guessing.
+
+The diff is not the boundary of the walkthrough. When the caller that starts
+the changed behaviour sits in unchanged code, read it, so the tour begins at
+the real entry point. A PR description, issue, or commit history can supply
+intent; keep that apart from what the code itself demonstrates.
 
 ## Phase 1 — Overview (keep it small)
 
-Identify the call site where the changed code first executes.
+Identify the call site where the changed code first executes. When the change
+is reached from several independent call sites, draw one tree per call site, in
+the order the tour will take them.
 
 Deliver in ONE message:
 
@@ -74,18 +82,41 @@ Then ask: "Ready for the walkthrough, questions first?" and wait.
 
 ## Phase 2 — Step-by-step tour
 
-Walk the diagram top-down. Exactly ONE step per message:
+Walk the diagram top-down, starting at the caller that initiates the changed
+behaviour rather than the file with the largest diff. Exactly ONE step per
+message:
 
-- Quote the relevant snippet(s) with `file:line` references
-- Explain what it does and why it lives there
+- Quote the relevant snippet(s) with `file:line` references: the lines that
+  changed or that show the handoff, not the boilerplate around them
+- Explain what it does, what this change altered, and why it lives there
 - Call out nuances explicitly: edge cases, ordering assumptions, hidden
   coupling, error paths, performance or concurrency notes
+- Mention the tests that cover this behaviour here, instead of touring the test
+  files separately
 - End with: "Questions about this step?"
 
 Wait for my reply before continuing, even if I only say "next".
+
+When the next step is not an obvious callee of the last one — a sibling, a
+later phase of the same caller, a second call site of a helper already covered
+— re-draw the live path from the call site down to it before explaining it.
+Keep it to that path, not the whole diagram:
+
+```text
+start()
+ └─ lookUp()                        at startup
+
+sync()                              later, same store
+ ├─ isQuarantined()                 skips entries already known bad
+ └─ lookUp()                        same helper, second call site
+```
+
+When one call site's flow is finished, say so and ask before starting the next.
 
 ## Rules
 
 - Never batch multiple steps into one message
 - Answer questions fully before resuming; resume at the exact step we left
+- A question about the current step keeps us on that step; it is not
+  permission to move on
 - If the code contradicts the Phase 1 overview, say so and correct the diagram
