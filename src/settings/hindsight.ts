@@ -1,9 +1,18 @@
 import { asRecord, requireList, requireString, requireUrl } from '../lib/parse'
-import { localSetting } from './local'
+import { readSettingsFile } from './local'
+import { HINDSIGHT_ENV_LOCAL } from './paths'
 import { HINDSIGHT_YML, configWhere, readConfigYaml } from './yaml'
 
 const WHERE = configWhere(HINDSIGHT_YML)
 const ACCESS = ['read', 'write'] as const
+
+let serviceEnvironment: Record<string, string> | undefined
+
+/** Load once per command, just as the service sources its environment once at startup. */
+function serviceSetting(key: string): string | undefined {
+  serviceEnvironment ??= readSettingsFile(HINDSIGHT_ENV_LOCAL)
+  return serviceEnvironment[key]?.trim() || undefined
+}
 
 export interface BankConfig {
   id: string
@@ -44,12 +53,12 @@ export async function loadHindsightConfig(): Promise<HindsightConfig> {
  * else the `url` from config/hindsight.yml that the caller passes in.
  */
 export function hindsightApiUrl(configured: string): string {
-  const explicit = localSetting('HINDSIGHT_API_URL')
+  const explicit = serviceSetting('HINDSIGHT_API_URL')
   if (explicit) return explicit.replace(/\/$/, '')
   // A half-set env overrides only its half; the rest comes from `configured`.
   const base = new URL(configured)
-  const host = localSetting('HINDSIGHT_API_HOST')
-  const port = localSetting('HINDSIGHT_API_PORT')
+  const host = serviceSetting('HINDSIGHT_API_HOST')
+  const port = serviceSetting('HINDSIGHT_API_PORT')
   if (host) base.hostname = host
   if (port) base.port = port
   return base.origin

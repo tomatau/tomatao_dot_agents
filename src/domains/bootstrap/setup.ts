@@ -27,6 +27,7 @@ export async function bootstrap({
     if (!onPath(name)) throw new Error(`${name} is required on PATH`)
   }
   await requireMemorySettings(mode)
+  const vault = await vaultReadiness()
 
   // Validate flags before changing remotes or harness configuration.
   const declared = await harnessChoices()
@@ -68,7 +69,7 @@ export async function bootstrap({
   await setupMemory('install', mode)
 
   console.log(`\n${bold('converge')}`)
-  await sync(mode, await vaultReadiness())
+  await sync(mode, vault)
 
   for (const note of (await listSources()).filter(isEmptySource)) {
     console.log(

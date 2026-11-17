@@ -10,9 +10,14 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { run } from '../../lib/shell'
 import { REPO } from '../../settings/paths'
+import { loadVaultConfig } from '../../settings/vault'
+import { VAULT_LOCAL_YML, configWhere } from '../../settings/yaml'
+
+const OFFLINE_SETTINGS =
+  'HINDSIGHT_API_LLM_PROVIDER=sh\nHINDSIGHT_API_URL=http://127.0.0.1:1\n'
 
 let root: string
 beforeAll(async () => {
@@ -26,7 +31,11 @@ async function fixture(name: string): Promise<string> {
   const path = join(root, name)
   await mkdir(path)
   await cp(join(REPO, 'src'), join(path, 'src'), { recursive: true })
-  await cp(join(REPO, 'config'), join(path, 'config'), { recursive: true })
+  // A fixture starts without a vault, whatever this machine declares.
+  await cp(join(REPO, 'config'), join(path, 'config'), {
+    recursive: true,
+    filter: source => basename(source) !== VAULT_LOCAL_YML,
+  })
   await symlink(join(REPO, 'node_modules'), join(path, 'node_modules'))
   await mkdir(join(path, 'personalisation'))
   await writeFile(
@@ -36,11 +45,32 @@ async function fixture(name: string): Promise<string> {
   await mkdir(join(path, 'hindsight'))
   await writeFile(
     join(path, 'hindsight/env.example'),
-    'VAULT_DIR="$HOME/template-vault"\nHINDSIGHT_API_LLM_PROVIDER=sh\n',
+    'HINDSIGHT_API_LLM_PROVIDER=sh\n',
   )
   const result = await run(['git', 'init', '-q', path])
   if (result.code) throw new Error(result.stderr)
   return path
+}
+
+function previewBootstrap(path: string) {
+  return run([
+    process.execPath,
+    join(path, 'src/entries/bootstrap.ts'),
+    '--dry-run',
+    '--yes',
+    '--harnesses=claude',
+  ])
+}
+
+/** A vault holding the two scope notes, declared as this fixture's vault. */
+async function declareVault(path: string): Promise<void> {
+  const vault = join(path, 'vault')
+  const { syncConfig, searchConfig } = await loadVaultConfig()
+  for (const note of [syncConfig, searchConfig]) {
+    await mkdir(dirname(join(vault, note)), { recursive: true })
+    await writeFile(join(vault, note), 'version: 1\n')
+  }
+  await writeFile(join(path, 'config', VAULT_LOCAL_YML), `dir: ${vault}\n`)
 }
 
 async function snapshot(path: string): Promise<Record<string, string>> {
@@ -58,18 +88,9 @@ test.skipIf(process.platform !== 'darwin')(
   'fresh offline bootstrap previews without changing files or Git configuration',
   async () => {
     const path = await fixture('offline')
-    await writeFile(
-      join(path, 'hindsight/env.local'),
-      `VAULT_DIR="${path}/vault"\nHINDSIGHT_API_LLM_PROVIDER=sh\nHINDSIGHT_API_URL=http://127.0.0.1:1\n`,
-    )
+    await writeFile(join(path, 'hindsight/env.local'), OFFLINE_SETTINGS)
     const before = await snapshot(path)
-    const result = await run([
-      process.execPath,
-      join(path, 'src/entries/bootstrap.ts'),
-      '--dry-run',
-      '--yes',
-      '--harnesses=claude',
-    ])
+    const result = await previewBootstrap(path)
     expect(result.code).toBe(0)
     expect(result.stdout).toContain('would install launchd service')
     expect(result.stdout).toContain('would ensure bank')
@@ -77,6 +98,60 @@ test.skipIf(process.platform !== 'darwin')(
     expect(await snapshot(path)).toEqual(before)
   },
 )
+
+test.skipIf(process.platform !== 'darwin')(
+  'bootstrap skips the vault-fed steps on a machine without a vault',
+  async () => {
+    // Arrange
+    const path = await fixture('no-vault')
+    await writeFile(join(path, 'hindsight/env.local'), OFFLINE_SETTINGS)
+    const expectedNotice = 'vault sync skipped'
+    const vaultFedStep = 'would run just sync-profile'
+
+    // Act
+    const result = await previewBootstrap(path)
+
+    // Assert
+    expect(result.code).toBe(0)
+    expect(result.stdout).toContain(expectedNotice)
+    expect(result.stdout).not.toContain(vaultFedStep)
+  },
+)
+
+test.skipIf(process.platform !== 'darwin')(
+  'bootstrap previews the vault-fed steps for a declared vault',
+  async () => {
+    // Arrange
+    const path = await fixture('declared-vault')
+    await writeFile(join(path, 'hindsight/env.local'), OFFLINE_SETTINGS)
+    await declareVault(path)
+    const vaultFedStep = 'would run just sync-profile'
+
+    // Act
+    const result = await previewBootstrap(path)
+
+    // Assert
+    expect(result.code).toBe(0)
+    expect(result.stdout).toContain(vaultFedStep)
+  },
+)
+
+test('a vault declared without a location stops bootstrap in preflight', async () => {
+  // Arrange
+  const path = await fixture('vault-without-location')
+  await writeFile(join(path, 'hindsight/env.local'), OFFLINE_SETTINGS)
+  await writeFile(join(path, 'config', VAULT_LOCAL_YML), 'path: ~/vault\n')
+  const expectedFault = `${configWhere(VAULT_LOCAL_YML)}: missing \`dir\``
+  const firstStepAfterPreflight = 'remotes'
+
+  // Act
+  const result = await previewBootstrap(path)
+
+  // Assert
+  expect(result.code).toBe(1)
+  expect(result.stderr).toContain(expectedFault)
+  expect(result.stdout).not.toContain(firstStepAfterPreflight)
+})
 
 test('missing settings stop dry-run and install before remote or harness changes', async () => {
   const path = await fixture('missing-settings')

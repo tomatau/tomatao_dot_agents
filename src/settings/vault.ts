@@ -1,10 +1,18 @@
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { asRecord, requireString } from '../lib/parse'
-import { localSetting } from './local'
-import { VAULT_YML, configWhere, readConfigYaml } from './yaml'
+import {
+  VAULT_LOCAL_YML,
+  VAULT_YML,
+  configWhere,
+  readConfigYaml,
+  readLocalConfigYaml,
+  resolvePath,
+} from './yaml'
 
 const WHERE = configWhere(VAULT_YML)
+const LOCAL_WHERE = configWhere(VAULT_LOCAL_YML)
+const NO_VAULT = `no vault declared: set \`dir\` in ${LOCAL_WHERE}`
 
 export interface VaultConfig {
   /** Vault-relative path to the note declaring what is in sync scope. */
@@ -13,13 +21,21 @@ export interface VaultConfig {
   searchConfig: string
 }
 
+/**
+ * Where this machine keeps its vault. The location differs per host, so it is
+ * declared beside the shared vault config in a file git ignores. A machine
+ * without that file has no vault.
+ */
+function declaredVaultDir(): string | undefined {
+  const declared = readLocalConfigYaml(VAULT_LOCAL_YML)
+  if (declared === undefined) return undefined
+  const raw = asRecord(LOCAL_WHERE, declared ?? {})
+  return resolvePath(requireString(LOCAL_WHERE, raw, 'dir'))
+}
+
 export function vaultDir(): string {
-  const dir = localSetting('VAULT_DIR')
-  if (!dir) {
-    throw new Error(
-      'VAULT_DIR not set — add it to hindsight/env.local (see env.example)',
-    )
-  }
+  const dir = declaredVaultDir()
+  if (!dir) throw new Error(NO_VAULT)
   return dir
 }
 
@@ -51,13 +67,8 @@ async function readable(path: string): Promise<boolean> {
 }
 
 export async function vaultReadiness(): Promise<VaultReadiness> {
-  const vault = localSetting('VAULT_DIR')
-  if (!vault) {
-    return {
-      state: 'missing',
-      detail: 'VAULT_DIR not set — add it to hindsight/env.local',
-    }
-  }
+  const vault = declaredVaultDir()
+  if (!vault) return { state: 'missing', detail: NO_VAULT }
   if (!(await readable(vault))) {
     return { state: 'missing', detail: `vault not found: ${vault}` }
   }

@@ -14,9 +14,10 @@ just sync                   # converge everything this machine can
 just doctor                 # verify wiring across harnesses
 ```
 
-Configure `hindsight/env.local` from `hindsight/env.example` before setup.
-Preview with `just bootstrap --dry-run`. See [machine setup](docs/bootstrap.md)
-for harness selection, remotes, and chezmoi use.
+Configure `hindsight/env.local` from `hindsight/env.example` before setup, and
+name this machine's vault in `config/vault.local.yml` if it has one. Preview
+with `just bootstrap --dry-run`. See [machine setup](docs/bootstrap.md) for
+harness selection, remotes, and chezmoi use.
 
 ## Layout
 

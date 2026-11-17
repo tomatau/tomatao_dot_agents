@@ -21,11 +21,7 @@ export async function requireMemorySettings(mode: Mode): Promise<void> {
     )
   }
   const settings = readSettingsFile(HINDSIGHT_ENV_LOCAL)
-  const template = readSettingsFile(HINDSIGHT_ENV_EXAMPLE)
   const problems: string[] = []
-  const vault = settings.VAULT_DIR?.trim()
-  if (!vault || vault === template.VAULT_DIR)
-    problems.push('set VAULT_DIR to your vault')
   const provider = settings.HINDSIGHT_API_LLM_PROVIDER?.trim()
   if (!provider) problems.push('set HINDSIGHT_API_LLM_PROVIDER')
   else {

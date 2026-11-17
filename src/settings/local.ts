@@ -1,6 +1,5 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { HINDSIGHT_ENV_LOCAL } from './paths'
 
 /** Use the service wrapper's shell semantics: file assignments override inherited values. */
 export function readSettingsFile(path: string): Record<string, string> {
@@ -29,12 +28,4 @@ export function readSettingsFile(path: string): Record<string, string> {
         return [entry.slice(0, split), entry.slice(split + 1)]
       }),
   )
-}
-
-let settings: Record<string, string> | undefined
-
-/** Load once per command, just as the service sources its environment once at startup. */
-export function localSetting(key: string): string | undefined {
-  settings ??= readSettingsFile(HINDSIGHT_ENV_LOCAL)
-  return settings[key]?.trim() || undefined
 }

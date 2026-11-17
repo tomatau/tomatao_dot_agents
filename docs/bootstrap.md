@@ -5,20 +5,25 @@ existing directory is separate from bootstrap.
 
 Before running setup, customise:
 
-| Choice                        | Location                                                   |
-| ----------------------------- | ---------------------------------------------------------- |
-| Vault and extraction provider | `hindsight/env.local`, copied from `hindsight/env.example` |
-| Vault sync and search scope   | `config/vault.yml`                                         |
-| Shared instructions           | `personalisation/*.md`                                     |
-| Skills                        | `skills/` — remove the ones you do not want                |
-| Memory banks                  | `config/hindsight.yml`                                     |
+| Choice                      | Location                                                   |
+| --------------------------- | ---------------------------------------------------------- |
+| Extraction provider         | `hindsight/env.local`, copied from `hindsight/env.example` |
+| Vault location              | `config/vault.local.yml`, as `dir: ~/path/to/vault`        |
+| Vault sync and search scope | `config/vault.yml`                                         |
+| Shared instructions         | `personalisation/*.md`                                     |
+| Skills                      | `skills/` — remove the ones you do not want                |
+| Memory banks                | `config/hindsight.yml`                                     |
 
-`env.local` is a shell file sourced by both CLI commands and the service.
-Assignments in it override inherited environment values; shell expansion and
-quoting apply. Bootstrap stops before installation or linking if the vault is
-unset or still the template path, or the provider command is unavailable. If
-`env.local` is missing, a real run creates it from the template and stops for you
-to edit it. A dry run leaves it absent.
+`env.local` is the memory service's environment: a shell file sourced by both
+CLI commands and the service. Assignments in it override inherited environment
+values; shell expansion and quoting apply. Bootstrap stops before installation
+or linking if the provider command is unavailable. If `env.local` is missing, a
+real run creates it from the template and stops for you to edit it. A dry run
+leaves it absent.
+
+`config/vault.local.yml` is gitignored, because a vault sits somewhere different
+on each machine. A machine without the file has no vault: bootstrap and sync
+skip the vault-fed steps and set everything else up.
 
 ## Run setup
 
@@ -38,7 +43,8 @@ as `upstream`. It leaves an existing `upstream` alone.
 Memory service installation uses macOS launchd. Bootstrap installs
 `hindsight-api`, starts the service if necessary, waits for it to answer, and
 ensures the configured banks exist. It then runs the same convergence steps as
-`just sync`. Vault-fed steps run only when both configured scope notes exist.
+`just sync`. Vault-fed steps run only when a vault is declared and both
+configured scope notes exist in it.
 
 For chezmoi or another non-interactive caller, pass your selection explicitly:
 

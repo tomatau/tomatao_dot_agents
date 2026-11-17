@@ -16,25 +16,25 @@ test('uses shell expansion, quoting, comments, and the last assignment', async (
   const file = join(root, 'settings')
   await writeFile(
     file,
-    'VAULT_DIR=first\nVAULT_DIR="$HOME/a vault" # local value\n',
+    'CODEX_HOME=first\nCODEX_HOME="$HOME/a home" # local value\n',
   )
-  expect(readSettingsFile(file).VAULT_DIR).toBe(`${process.env.HOME}/a vault`)
+  expect(readSettingsFile(file).CODEX_HOME).toBe(`${process.env.HOME}/a home`)
 })
 
 test('file assignments override inherited values, including empty values', async () => {
   const file = join(root, 'override')
   await writeFile(
     file,
-    'HOME=/fixture\nVAULT_DIR="$HOME/vault"\nHINDSIGHT_API_PORT=\n',
+    'HOME=/fixture\nCODEX_HOME="$HOME/codex"\nHINDSIGHT_API_PORT=\n',
   )
   const settings = readSettingsFile(file)
   expect(settings.HOME).toBe('/fixture')
-  expect(settings.VAULT_DIR).toBe('/fixture/vault')
+  expect(settings.CODEX_HOME).toBe('/fixture/codex')
   expect(settings.HINDSIGHT_API_PORT).toBe('')
 })
 
 test('rejects a broken shell file rather than silently falling back', async () => {
   const file = join(root, 'broken')
-  await writeFile(file, 'VAULT_DIR="unterminated\n')
+  await writeFile(file, 'CODEX_HOME="unterminated\n')
   expect(() => readSettingsFile(file)).toThrow('cannot load shell settings')
 })

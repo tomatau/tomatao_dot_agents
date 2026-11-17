@@ -67,7 +67,7 @@ not whether you have approved it. These conventions sit on top:
 
 Scope lives **in the vault** at `_system/config/memory-sync.yml`; this repo owns
 only the reader. Vault location is machine-local and not checked in:
-`VAULT_DIR` in `hindsight/env.local` (gitignored), e.g. on this host
+`dir` in `config/vault.local.yml` (gitignored), e.g. on this host
 `/Users/tomatao/Documents/obsidian/Tom's`. Schema v1:
 
 ```yaml
@@ -125,7 +125,10 @@ vault rule selected as a hard instruction
 
 ## Machine-local configuration
 
-- `hindsight/env.local` (gitignored) holds `VAULT_DIR` plus `HINDSIGHT_API_*`.
-  `hindsight/env.example` is the committed template.
+- `hindsight/env.local` (gitignored) holds the service's `HINDSIGHT_API_*`
+  environment. `hindsight/env.example` is the committed template.
+- `config/vault.local.yml` (gitignored) holds the vault's location, which the
+  memory sync and the search sync both read. It is not part of the service's
+  environment, because the service never reads the vault.
 - This keeps host-specific paths out of the repo so the same checkout works
   across machines.
