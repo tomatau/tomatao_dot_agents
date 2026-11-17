@@ -42,12 +42,17 @@ export function planSkillLinks({
   )
 }
 
-export async function listSkills(): Promise<string[]> {
-  const entries = await readdir(SKILLS_DIR, { withFileTypes: true })
-  return entries
-    .filter(e => e.isDirectory())
-    .map(e => e.name)
-    .sort()
+export async function listSkills(root = SKILLS_DIR): Promise<string[]> {
+  const names = await Promise.all(
+    (await readdir(root)).map(async name => {
+      try {
+        return (await stat(join(root, name))).isDirectory() ? name : null
+      } catch {
+        return null
+      }
+    }),
+  )
+  return names.filter((name): name is string => name !== null).sort()
 }
 
 export type SkillState = 'ok' | 'missing-skill-md'

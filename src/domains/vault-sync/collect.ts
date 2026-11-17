@@ -24,7 +24,11 @@ async function collectFiles(
 ): Promise<string[]> {
   const glob = new Glob(pattern)
   const results: string[] = []
-  for await (const rel of glob.scan({ cwd: vault, onlyFiles: true })) {
+  for await (const rel of glob.scan({
+    cwd: vault,
+    onlyFiles: true,
+    followSymlinks: true,
+  })) {
     if (!rel.endsWith('.md')) continue
     if (excludes.some(excl => excl.match(rel))) continue
     results.push(rel)
