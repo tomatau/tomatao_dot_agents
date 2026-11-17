@@ -11,6 +11,11 @@ personalisation/*
 !personalisation/.gitkeep
 # Machine-local vault symlinks are ignored; real source files are tracked explicitly.
 !personalisation/Shared memory.md
+# Skills are ignored unless listed here; skills other tools install and
+# machine-specific ones stay untracked.
+skills/*
+!skills/code-quality-standard/
+!skills/teach-me-code/
 .DS_Store
 mcp/.state.json
 
