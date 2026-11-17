@@ -30,6 +30,7 @@ const SEVERITIES: Record<string, Severity> = {
   linked: 'pass',
   retargeted: 'pass',
   native: 'info',
+  external: 'info',
   stale: 'warn',
   missing: 'warn',
   'wrong-url': 'warn',

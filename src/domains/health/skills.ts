@@ -1,8 +1,8 @@
 import type { Row, Section } from '../../lib/report'
-import { checkLinks } from '../../lib/links'
 import { loadAdaptersConfig } from '../../settings/adapters'
 import { SKILLS_DIR, displayPath } from '../../settings/paths'
 import {
+  checkSkillLinks,
   inspectSkills,
   listSkills,
   planSkillLinks,
@@ -23,8 +23,12 @@ export async function skillLinkRows(): Promise<Row[]> {
   })
   const rows: Row[] = []
   for (const [name, links] of Object.entries(plan)) {
-    for (const check of await checkLinks({ links })) {
-      rows.push({ name, state: check.state, detail: displayPath(check.link.dest) })
+    for (const check of await checkSkillLinks({ links })) {
+      rows.push({
+        name,
+        state: check.state,
+        detail: displayPath(check.link.dest),
+      })
     }
   }
   return rows
