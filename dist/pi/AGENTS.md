@@ -20,6 +20,11 @@
   cannot be verified.
 - Leave decisions about direction, scope, and trade-offs to me. Work one step at a time and
   let me validate each step before continuing.
+- When changing code, make each step one commit-sized change. Explain its goal, make only
+  the changes it needs, run the smallest relevant check, and stop for my review. Batch
+  steps only when I ask.
+- Build the solution up through those steps. Each one stands on its own and builds and
+  tests where practical. Avoid writing the whole solution first and splitting it afterwards.
 - Prioritise correctness and honest assessment. Challenge problems, explain your concerns,
   and help redirect the work towards a better course.
 - Treat proposals as open until I explicitly confirm them. Agreement covers only the confirmed point.
