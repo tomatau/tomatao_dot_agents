@@ -1,10 +1,18 @@
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
+import {
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises'
 import { basename, dirname, extname, join } from 'node:path'
 import type { SourceFile } from '../adapters/types'
 import { loadPersonalisationAdapters } from '../adapters/index'
 import { loadDeclaredHarnesses } from '../settings/adapters'
 import { PERSONALISATION_DIR, REPO } from '../settings/paths'
 import { personalisationDestinations, reconcileLinks } from './reconcile'
+import { staleRenders } from './stale-renders'
 
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n/
 
@@ -63,12 +71,16 @@ export function isEmptySource({ content }: SourceFile): boolean {
 
 export async function renderPersonalisation(): Promise<void> {
   const sources = await listSources()
-  for (const adapter of await loadPersonalisationAdapters()) {
-    for (const file of adapter.render(sources)) {
-      await mkdir(dirname(file.distPath), { recursive: true })
-      await writeFile(file.distPath, file.content)
-      console.log(`rendered     ${file.distPath}`)
-    }
+  const adapters = await loadPersonalisationAdapters()
+  const rendered = adapters.flatMap(adapter => adapter.render(sources))
+  for (const file of rendered) {
+    await mkdir(dirname(file.distPath), { recursive: true })
+    await writeFile(file.distPath, file.content)
+    console.log(`rendered     ${file.distPath}`)
+  }
+  for (const path of await staleRenders(rendered.map(f => f.distPath))) {
+    await rm(path)
+    console.log(`removed      ${path}`)
   }
 }
 

@@ -16,6 +16,9 @@ vault note (SoT)
   `personalisation/` (they're links) or `dist/` (they're generated, but committed).
 - **Adding a personalisation file**: create/symlink a new `.md` in
   `personalisation/`, run `just sync-personalisation`. No config edits needed.
+- **Removing a personalisation file**: delete it from `personalisation/` and
+  run `just sync-personalisation`. The render deletes the file it left in
+  `dist/`, and the link step retires the symlink that pointed at it.
 
 ## Conventions
 
