@@ -1,8 +1,6 @@
 # sync-search
 
 Building the fidx indexes an agent searches, from the scope the vault declares.
-It replaces `search-sync`, which builds LEANN indexes, once both have been seen
-to agree.
 
 - The vault decides what is searchable; this domain only reads that decision.
   An index gains a source by editing the vault's declaration, never this repo.

@@ -6,7 +6,6 @@ config/search.local.yml
 hindsight/codex-home/
 hindsight/*.plist
 hindsight/.sync-cache.json
-/leann/
 /fidx/
 personalisation/*
 !personalisation/.gitkeep

@@ -43,10 +43,6 @@ sync-profile *args:
     bun src/entries/sync-profile.ts {{args}}
 
 [group('sync')]
-search-sync *args:
-    bun src/entries/search-sync.ts {{args}}
-
-[group('sync')]
 sync-search *args:
     bun src/entries/sync-search.ts {{args}}
 

@@ -35,19 +35,9 @@ export function displayPath(path: string): string {
 export const VAULT_SYNC_CACHE = join(HINDSIGHT_DIR, '.sync-cache.json')
 
 /**
- * LEANN writes an index into `.leann/` below the directory it runs in, and
- * registers that directory globally. Builds run here so no index, and no
- * derived copy of a note, is ever written into the vault itself.
- */
-export const LEANN_DIR = join(REPO, 'leann')
-/** When each index last built, so a reader can judge its freshness. */
-export const LEANN_STATE = join(LEANN_DIR, '.state.json')
-/** Installed by `uv tool install`; harnesses need not have it on PATH. */
-export const LEANN_BIN = join(homedir(), '.local/bin/leann')
-
-/**
  * One fidx database per index, so each keeps its own scope and can be rebuilt
- * or deleted alone. Like LEANN's, they stay out of the vault.
+ * or deleted alone. They stay out of the vault, so no derived copy of a note
+ * is written into it.
  */
 export const FIDX_DIR = join(REPO, 'fidx')
 /** A uv tool the dotfiles install; harnesses need not have it on PATH. */
@@ -55,13 +45,4 @@ export const FIDX_BIN = join(homedir(), '.local/bin/fidx')
 
 export function fidxDb(name: string): string {
   return join(FIDX_DIR, `${name}.db`)
-}
-
-/**
- * The file LEANN treats as proof an index exists. `documents.leann` is a
- * handle rather than a file on disk, so the meta beside it is what to test.
- */
-export function leannIndexMeta(name: string): string {
-  const dir = join(LEANN_DIR, '.leann', 'indexes', name)
-  return join(dir, 'documents.leann.meta.json')
 }
