@@ -1,0 +1,7 @@
+# Search over local fidx indexes: one stdio server offering every index in
+# config/search.local.yml, a file each machine writes for itself.
+#
+# `kind: search` reads that file when `just mcp` runs and pins the indexes as
+# arguments, so a change to it takes effect after the next `just mcp`.
+kind: search
+command: bun

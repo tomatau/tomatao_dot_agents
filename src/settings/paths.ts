@@ -9,6 +9,7 @@ export const MCP_DIR = join(REPO, 'mcp')
 export const MCP_STATE = join(MCP_DIR, '.state.json')
 /** The stdio server a harness spawns for per-project memory. */
 export const PROJECT_MEMORY_ENTRY = join(REPO, 'src/entries/project-memory.ts')
+export const SEARCH_ENTRY = join(REPO, 'src/entries/search.ts')
 
 export const HINDSIGHT_DIR = join(REPO, 'hindsight')
 export const HINDSIGHT_ENV_LOCAL = join(HINDSIGHT_DIR, 'env.local')

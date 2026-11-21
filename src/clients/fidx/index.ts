@@ -62,3 +62,45 @@ export async function documentCount(db: string, name: string): Promise<number> {
   if (!collection) throw new Error(`fidx has no collection \`${name}\``)
   return collection.documents
 }
+
+export type SearchMode = 'hybrid' | 'lexical' | 'vector'
+
+export interface Hit {
+  /** `<collection>/<path below its root>`, which `readDocument` takes back. */
+  path: string
+  score: number
+  snippet: string
+}
+
+interface Found {
+  path: string
+  score: number
+  snippet?: string
+}
+
+export async function search(
+  db: string,
+  query: string,
+  { limit, mode }: { limit: number; mode: SearchMode },
+): Promise<Hit[]> {
+  const out = await fidx(db, [
+    'search',
+    query,
+    '--json',
+    '-n',
+    String(limit),
+    '--mode',
+    mode,
+  ])
+  const { results } = JSON.parse(out) as { results: Found[] }
+  return results.map(({ path, score, snippet }) => ({
+    path,
+    score,
+    snippet: snippet ?? '',
+  }))
+}
+
+/** A document's full text, by the path a search hit gave. */
+export async function readDocument(db: string, path: string): Promise<string> {
+  return fidx(db, ['get', path, '--full'])
+}

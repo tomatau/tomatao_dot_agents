@@ -1,7 +1,8 @@
 import type { McpResolver } from '../lib/mcp'
 import { projectMemorySource } from '../domains/project-memory/source'
+import { searchSource } from '../domains/search/source'
 import { sharedMemorySource } from '../domains/shared-memory/sources'
-import { PROJECT_MEMORY_ENTRY } from '../settings/paths'
+import { PROJECT_MEMORY_ENTRY, SEARCH_ENTRY } from '../settings/paths'
 
 /**
  * Which `kind:` values `mcp/<id>.yml` may use. Composition, so it lives with the
@@ -11,4 +12,5 @@ import { PROJECT_MEMORY_ENTRY } from '../settings/paths'
 export const kinds: Record<string, McpResolver> = {
   'shared-memory': sharedMemorySource,
   'project-memory': projectMemorySource(PROJECT_MEMORY_ENTRY),
+  search: searchSource(SEARCH_ENTRY),
 }
