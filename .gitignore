@@ -15,7 +15,10 @@ personalisation/*
 # machine-specific ones stay untracked.
 skills/*
 !skills/code-quality-standard/
+!skills/requirements-traceability/
 !skills/teach-me-code/
+!skills/test-strategy/
+!skills/testing-standard/
 .DS_Store
 mcp/.state.json
 
