@@ -35,6 +35,21 @@ const callTool = (name: string, args: Record<string, unknown>) => ({
   params: { name, arguments: args },
 })
 
+test('tells the harness up front what each pinned index holds', async () => {
+  // Arrange
+  const message = { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }
+
+  // Act
+  const answer = await respond(message, INDEXES, fakeFidx().fidx)
+
+  // Assert
+  const { instructions } = answer?.result as { instructions: string }
+  expect(instructions.split('\n').slice(1)).toEqual([
+    '- notes: My notes.',
+    '- specs: Specs.',
+  ])
+})
+
 test('offers both tools, each choosing among the pinned indexes', async () => {
   // Arrange
   const message = { jsonrpc: '2.0', id: 1, method: 'tools/list' }

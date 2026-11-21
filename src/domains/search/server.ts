@@ -37,6 +37,16 @@ const text = (body: string, isError = false) => ({
   ...(isError && { isError }),
 })
 
+const choices = (indexes: SearchIndex[]): string =>
+  indexes.map(i => `- ${i.name}: ${i.description}`).join('\n')
+
+/**
+ * What a harness tells its agent about this server up front, so an agent knows
+ * the indexes exist before it thinks to look for a tool.
+ */
+export const instructions = (indexes: SearchIndex[]): string =>
+  `Local indexes of documents. When a question touches what one holds, search it before answering from memory, and cite the paths you rely on:\n${choices(indexes)}`
+
 /** The two tools, described from the indexes this server was pinned with. */
 export function tools(indexes: SearchIndex[]): unknown[] {
   const index = {
@@ -44,11 +54,10 @@ export function tools(indexes: SearchIndex[]): unknown[] {
     enum: indexes.map(i => i.name),
     description: 'Which index to use.',
   }
-  const choices = indexes.map(i => `- ${i.name}: ${i.description}`).join('\n')
   return [
     {
       name: 'search',
-      description: `Search a local index for the documents that best answer a question. Pick the index whose contents fit:\n${choices}`,
+      description: `Search a local index for the documents that best answer a question. Pick the index whose contents fit:\n${choices(indexes)}`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -149,6 +158,7 @@ export async function respond(
         protocolVersion: '2025-06-18',
         capabilities: { tools: {} },
         serverInfo: { name: 'search', version: '0' },
+        instructions: instructions(indexes),
       })
     case 'ping':
       return reply(id, {})
