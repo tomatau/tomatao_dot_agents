@@ -45,6 +45,18 @@ export const LEANN_STATE = join(LEANN_DIR, '.state.json')
 export const LEANN_BIN = join(homedir(), '.local/bin/leann')
 
 /**
+ * One fidx database per index, so each keeps its own scope and can be rebuilt
+ * or deleted alone. Like LEANN's, they stay out of the vault.
+ */
+export const FIDX_DIR = join(REPO, 'fidx')
+/** A uv tool the dotfiles install; harnesses need not have it on PATH. */
+export const FIDX_BIN = join(homedir(), '.local/bin/fidx')
+
+export function fidxDb(name: string): string {
+  return join(FIDX_DIR, `${name}.db`)
+}
+
+/**
  * The file LEANN treats as proof an index exists. `documents.leann` is a
  * handle rather than a file on disk, so the meta beside it is what to test.
  */

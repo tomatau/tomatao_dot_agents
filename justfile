@@ -47,6 +47,10 @@ search-sync *args:
     bun src/entries/search-sync.ts {{args}}
 
 [group('sync')]
+sync-search *args:
+    bun src/entries/sync-search.ts {{args}}
+
+[group('sync')]
 banks:
     bun src/entries/hindsight.ts banks
 
