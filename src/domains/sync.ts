@@ -11,7 +11,7 @@ import { REPO } from '../settings/paths'
  * so a machine without one is still fully wired.
  */
 const REPO_STEPS = ['sync-personalisation', 'link-skills', 'banks', 'mcp']
-const VAULT_STEPS = ['search-sync --if-stale', 'sync-profile']
+const VAULT_STEPS = ['sync-search', 'sync-profile']
 
 export function syncSteps(vaultReady: boolean): string[] {
   return [...REPO_STEPS, ...(vaultReady ? VAULT_STEPS : [])]

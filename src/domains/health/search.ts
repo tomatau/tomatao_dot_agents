@@ -1,40 +1,30 @@
 import type { Row } from '../../lib/report'
-import type { IndexFreshness } from '../search-sync/freshness'
-import { indexFreshness } from '../search-sync/freshness'
+import type { IndexFreshness } from '../sync-search/freshness'
+import { indexFreshness } from '../sync-search/freshness'
 
 function ago(iso: string): string {
   const hours = (Date.now() - Date.parse(iso)) / 3_600_000
-  if (hours < 1) return 'built just now'
-  if (hours < 48) return `built ${Math.round(hours)}h ago`
-  return `built ${Math.round(hours / 24)}d ago`
-}
-
-function scopeDrift({ inScope, indexed }: IndexFreshness): string {
-  // Equal counts still mean a different set: a note renamed, or one swapped
-  // for another.
-  return inScope === indexed
-    ? `scope changed — ${inScope} notes, but not the same ones`
-    : `scope changed — ${inScope} notes in scope, ${indexed} indexed`
+  if (hours < 1) return 'synced just now'
+  if (hours < 48) return `synced ${Math.round(hours)}h ago`
+  return `synced ${Math.round(hours / 24)}d ago`
 }
 
 function detailOf(freshness: IndexFreshness): string {
-  const { inScope, edited, builtAt = '' } = freshness
+  const { inScope, indexed, edited, syncedAt = '' } = freshness
   switch (freshness.reason) {
-    case 'unrecorded':
-      return 'build not recorded'
     case 'scope-changed':
-      return scopeDrift(freshness)
+      return `scope changed — ${inScope} notes in scope, ${indexed} indexed`
     case 'notes-edited':
-      return `${edited} of ${inScope} notes edited since it ${ago(builtAt)}`
+      return `${edited} of ${inScope} notes edited since it ${ago(syncedAt)}`
     default:
       return freshness.state === 'missing'
-        ? 'never built'
-        : `${inScope} notes, ${ago(builtAt)}`
+        ? 'never synced'
+        : `${inScope} notes, ${ago(syncedAt)}`
   }
 }
 
 /**
- * An index nobody can prove fresh is worse than none, so `just search-sync`
+ * An index nobody can prove fresh is worse than none, so the freshness check
  * decides the state and this only says it out loud.
  */
 export async function searchIndexRows(): Promise<Row[]> {

@@ -7,7 +7,7 @@ claude:
       target: skills/
   mcp:
     scope: user
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 codex:
   personalisation:
@@ -16,7 +16,7 @@ codex:
   skills: native
   mcp:
     home: '~/.codex'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 opencode:
   personalisation:
@@ -25,7 +25,7 @@ opencode:
   skills: native
   mcp:
     file: '~/.config/opencode/opencode.jsonc'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 zed:
   personalisation:
@@ -34,7 +34,7 @@ zed:
   skills: native
   mcp:
     file: '~/.config/zed/settings.json'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 cursor:
   personalisation:
@@ -45,7 +45,7 @@ cursor:
       target: skills/
   mcp:
     file: '~/.cursor/mcp.json'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 warp:
   personalisation:
@@ -53,7 +53,7 @@ warp:
       target: dist/warp/AGENTS.md
   mcp:
     file: '~/.warp/.mcp.json'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 antigravity:
   personalisation:
@@ -62,7 +62,7 @@ antigravity:
   skills: native
   mcp:
     file: '~/.gemini/config/mcp_config.json'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
 
 pi:
   personalisation:
@@ -71,4 +71,4 @@ pi:
   skills: native
   mcp:
     file: '~/.pi/agent/mcp.json'
-    enable: [shared-memory, project-memory, leann]
+    enable: [shared-memory, project-memory, shared-search]
