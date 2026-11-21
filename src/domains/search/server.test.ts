@@ -74,6 +74,7 @@ test('searches the chosen index and lists each hit with its score', async () => 
     index: 'specs',
     query: 'aria-label on a div',
     mode: 'lexical',
+    collections: ['aria'],
   })
 
   // Act
@@ -86,7 +87,7 @@ test('searches the chosen index and lists each hit with its score', async () => 
         'search',
         SPECS.db,
         'aria-label on a div',
-        { limit: 8, mode: 'lexical' },
+        { limit: 8, mode: 'lexical', collections: ['aria'] },
       ],
     ],
     result: {
@@ -130,6 +131,12 @@ test.each([
     callTool('get', { index: 'notes' }),
     {},
     '`path` must be a path from `search`',
+  ],
+  [
+    'collections that are not names',
+    callTool('search', { index: 'specs', query: 'x', collections: 'aria' }),
+    {},
+    '`collections` must list collection names',
   ],
   [
     'fidx failing',
@@ -182,4 +189,23 @@ test.each([
 
   // Assert
   expect(answer).toEqual(expected)
+})
+
+test('says a scoped search that found nothing may name a wrong collection', async () => {
+  // Arrange
+  const { fidx } = fakeFidx({ search: async () => [] })
+  const message = callTool('search', {
+    index: 'specs',
+    query: 'div',
+    collections: ['htmlaria'],
+  })
+
+  // Act
+  const answer = await respond(message, INDEXES, fidx)
+
+  // Assert
+  const [content] = (answer?.result as { content: { text: string }[] }).content
+  expect(content?.text).toStartWith(
+    'No documents matched. Check each collection',
+  )
 })

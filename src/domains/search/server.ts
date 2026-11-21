@@ -1,4 +1,4 @@
-import type { Hit, SearchMode } from '../../clients/fidx'
+import type { Hit, SearchMode, SearchOptions } from '../../clients/fidx'
 import type { JsonRpc } from '../../clients/mcp-http'
 import type { SearchIndex } from '../../settings/search'
 
@@ -12,11 +12,7 @@ const BAD_PARAMS = -32602
 
 /** What the server does to answer; the entry passes fidx, a test passes fakes. */
 export interface Fidx {
-  search(
-    db: string,
-    query: string,
-    options: { limit: number; mode: SearchMode },
-  ): Promise<Hit[]>
+  search(db: string, query: string, options: SearchOptions): Promise<Hit[]>
   readDocument(db: string, path: string): Promise<string>
 }
 
@@ -75,6 +71,12 @@ export function tools(indexes: SearchIndex[]): unknown[] {
             description:
               'hybrid (default) mixes keyword and meaning; lexical suits exact names and identifiers; vector suits loose wording.',
           },
+          collections: {
+            type: 'array',
+            items: { type: 'string' },
+            description:
+              'Search only these collections: the first part of each path, such as `aria` in `aria/aria-label.md`. Every collection if unset.',
+          },
         },
         required: ['index', 'query'],
       },
@@ -94,9 +96,16 @@ export function tools(indexes: SearchIndex[]): unknown[] {
   ]
 }
 
-const listing = (hits: Hit[]): string =>
+const NONE = 'No documents matched.'
+
+// fidx answers an unknown collection with nothing, so a typo looks like a miss.
+const SCOPED_NONE = `${NONE} Check each collection name against the first part of a path from an unscoped search.`
+
+const listing = (hits: Hit[], scoped: boolean): string =>
   hits.length === 0
-    ? 'No documents matched.'
+    ? scoped
+      ? SCOPED_NONE
+      : NONE
     : hits
         .map(
           (hit, i) =>
@@ -131,8 +140,19 @@ async function call(
       const mode = MODES.includes(args.mode as SearchMode)
         ? (args.mode as SearchMode)
         : 'hybrid'
-      const hits = await fidx.search(index.db, args.query, { limit, mode })
-      return text(listing(hits))
+      const collections = args.collections ?? []
+      if (
+        !Array.isArray(collections) ||
+        collections.some(c => typeof c !== 'string' || !c.trim())
+      ) {
+        return text('`collections` must list collection names', true)
+      }
+      const hits = await fidx.search(index.db, args.query, {
+        limit,
+        mode,
+        collections,
+      })
+      return text(listing(hits, collections.length > 0))
     }
     if (typeof args.path !== 'string' || !args.path.trim()) {
       return text('`path` must be a path from `search`', true)

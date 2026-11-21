@@ -72,6 +72,12 @@ export interface Hit {
   snippet: string
 }
 
+export interface SearchOptions {
+  limit: number
+  mode: SearchMode
+  collections: string[]
+}
+
 interface Found {
   path: string
   score: number
@@ -81,7 +87,7 @@ interface Found {
 export async function search(
   db: string,
   query: string,
-  { limit, mode }: { limit: number; mode: SearchMode },
+  { limit, mode, collections }: SearchOptions,
 ): Promise<Hit[]> {
   const out = await fidx(db, [
     'search',
@@ -91,6 +97,7 @@ export async function search(
     String(limit),
     '--mode',
     mode,
+    ...collections.flatMap(name => ['-c', name]),
   ])
   const { results } = JSON.parse(out) as { results: Found[] }
   return results.map(({ path, score, snippet }) => ({
