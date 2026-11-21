@@ -10,6 +10,7 @@ export const ADAPTERS_YML = 'adapters.yml'
 export const HINDSIGHT_YML = 'hindsight.yml'
 export const VAULT_YML = 'vault.yml'
 export const VAULT_LOCAL_YML = 'vault.local.yml'
+export const SEARCH_LOCAL_YML = 'search.local.yml'
 
 /** How a config file is named when a message points the reader at it. */
 export const configWhere = (file: string): string => `config/${file}`

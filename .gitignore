@@ -2,6 +2,7 @@ node_modules/
 hindsight/logs/
 hindsight/env.local
 config/vault.local.yml
+config/search.local.yml
 hindsight/codex-home/
 hindsight/*.plist
 hindsight/.sync-cache.json
