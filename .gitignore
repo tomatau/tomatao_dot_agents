@@ -14,6 +14,7 @@ personalisation/*
 # Skills are ignored unless listed here; skills other tools install and
 # machine-specific ones stay untracked.
 skills/*
+!skills/a11y-specs/
 !skills/code-quality-standard/
 !skills/requirements-traceability/
 !skills/teach-me-code/
