@@ -52,6 +52,7 @@ Work within the existing test strategy. Escalate anything beyond it.
 - Does it exercise the contract through its surface, without reaching into
   internals?
 - Would it fail if the behaviour broke?
+- When it cites an ID, does it assert the outcome that requirement states?
 - Are stubs and fixtures named by scenario?
 - Does shared setup reduce repetition without hiding intent?
 - Is the file within the size heuristic, and is the test as fast as its peers?
