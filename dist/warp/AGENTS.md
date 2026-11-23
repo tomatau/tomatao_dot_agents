@@ -123,7 +123,10 @@ After the initial recall, call `recall` against `project-memory` again only when
 its history, and its docs do not already record — a constraint, a rationale, a
 gotcha that cost you time. Same tags as learnings.
 
-Outside a git repo it offers no tools, which is expected rather than a fault.
+When the harness cannot tell which repo you are in, its tools ask for a
+`project_path`: pass the absolute path of the repository you are working in.
+Outside any git repo there is no project bank, which is expected rather than a
+fault.
 
 ## When sources disagree
 
