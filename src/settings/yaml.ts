@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { overlay } from '../lib/overlay'
 import { REPO } from './paths'
 
 const CONFIG_DIR = join(REPO, 'config')
@@ -22,9 +23,23 @@ export function resolvePath(path: string): string {
   return join(REPO, path)
 }
 
-/** Read one file from `config/`. The caller validates what it finds. */
+/** The gitignored file a machine writes beside `file` to adjust it for itself. */
+export const localConfigName = (file: string): string =>
+  file.replace(/\.yml$/, '.local.yml')
+
+/** A config file's content, or `undefined` when it is absent or empty. */
+async function readYaml(file: string): Promise<unknown> {
+  const path = join(CONFIG_DIR, file)
+  if (!existsSync(path)) return undefined
+  return Bun.YAML.parse(await readFile(path, 'utf8')) ?? undefined
+}
+
+/**
+ * Read one file from `config/`, with this machine's local file laid over it.
+ * Either may be absent. The caller validates what it finds.
+ */
 export async function readConfigYaml(file: string): Promise<unknown> {
-  return Bun.YAML.parse(await readFile(join(CONFIG_DIR, file), 'utf8'))
+  return overlay(await readYaml(file), await readYaml(localConfigName(file)))
 }
 
 /**

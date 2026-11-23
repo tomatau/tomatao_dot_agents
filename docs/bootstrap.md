@@ -21,6 +21,11 @@ or linking if the provider command is unavailable. If `env.local` is missing, a
 real run creates it from the template and stops for you to edit it. A dry run
 leaves it absent.
 
+Any `config/<name>.yml` can be adjusted for one machine in a gitignored
+`config/<name>.local.yml` beside it. The local file is laid over the shared one:
+mappings merge key by key at every depth, and a scalar or a list replaces the
+shared value whole. Either file may be absent.
+
 `config/vault.local.yml` is gitignored, because a vault sits somewhere different
 on each machine. A machine without the file has no vault: bootstrap and sync
 skip the vault-fed steps and set everything else up.

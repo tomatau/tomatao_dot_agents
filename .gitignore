@@ -1,8 +1,8 @@
 node_modules/
 hindsight/logs/
 hindsight/env.local
-config/vault.local.yml
-config/search.local.yml
+# A machine adjusts any config/<name>.yml in its own <name>.local.yml.
+config/*.local.yml
 hindsight/codex-home/
 hindsight/*.plist
 hindsight/.sync-cache.json
