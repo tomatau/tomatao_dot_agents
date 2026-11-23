@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { projectBankId } from './identity'
+import { projectBankId, rootBankId } from './identity'
 
 let root: string
 
@@ -81,6 +81,42 @@ describe('naming a repo', () => {
 
     // Act & Assert: identity follows the remote, not the path.
     expect(await projectBankId(clone)).toBe(await projectBankId(original))
+  })
+})
+
+describe('naming a repo from the roots a client reports', () => {
+  const rootsReply = (...paths: string[]) => ({
+    jsonrpc: '2.0',
+    id: 'bridge/roots',
+    result: { roots: paths.map(path => ({ uri: `file://${path}` })) },
+  })
+
+  test('names the repo when every root is inside it', async () => {
+    // Arrange
+    const repo = await makeRepo('one-repo', 'git@github.com:acme/one.git')
+    const nested = join(repo, 'packages', 'app')
+    await Bun.$`mkdir -p ${nested}`.quiet()
+
+    // Act & Assert
+    const expectedBank = 'project-github-com-acme-one'
+    expect(await rootBankId(rootsReply(repo, nested))).toBe(expectedBank)
+  })
+
+  test('names no bank when roots span two repos', async () => {
+    const first = await makeRepo('first', 'git@github.com:acme/first.git')
+    const second = await makeRepo('second', 'git@github.com:acme/second.git')
+    expect(await rootBankId(rootsReply(first, second))).toBeUndefined()
+  })
+
+  test('names no bank when a root is outside any repo', async () => {
+    const repo = await makeRepo('beside-plain', 'git@github.com:acme/b.git')
+    const plain = join(root, 'plain-beside')
+    await Bun.$`mkdir -p ${plain}`.quiet()
+    expect(await rootBankId(rootsReply(repo, plain))).toBeUndefined()
+  })
+
+  test('names no bank when there are no roots', async () => {
+    expect(await rootBankId(rootsReply())).toBeUndefined()
   })
 })
 
