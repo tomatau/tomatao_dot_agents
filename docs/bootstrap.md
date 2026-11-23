@@ -40,8 +40,10 @@ just bootstrap
 ```
 
 Bootstrap asks which harnesses to use and whether to add a missing Git remote.
-It records unselected harnesses as disabled in `config/adapters.yml`. Sync
-retires their repo-owned personalisation and skill links.
+It records the choice in `config/adapters.local.yml`, and only where it departs
+from `config/adapters.yml`, which stays as every machine has it. Sync
+retires the repo-owned personalisation and skill links of a harness that is
+switched off.
 
 When `origin` points to the canonical repository, bootstrap keeps it. When
 `origin` points to your fork, bootstrap offers to add the canonical repository

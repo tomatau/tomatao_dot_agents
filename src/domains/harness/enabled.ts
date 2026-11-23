@@ -1,86 +1,55 @@
-import { readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import type { Mode } from '../../lib/mode'
 import type { AdaptersConfig } from '../../settings/adapters'
 import { APPLY } from '../../lib/mode'
+import { asRecord } from '../../lib/parse'
 import {
   loadDeclaredHarnesses,
   parseAdaptersConfig,
 } from '../../settings/adapters'
-import { REPO, displayPath } from '../../settings/paths'
-import { ADAPTERS_YML } from '../../settings/yaml'
+import { displayPath } from '../../settings/paths'
+import {
+  ADAPTERS_YML,
+  configWhere,
+  localConfigName,
+  readConfigFile,
+  writeConfigFile,
+} from '../../settings/yaml'
+
+const LOCAL_YML = localConfigName(ADAPTERS_YML)
+const WHERE = configWhere(ADAPTERS_YML)
+
+type Raw = Record<string, unknown>
 
 /**
- * `enabled:` sits at the top of each harness's block, so a harness is one
- * line-keyed block and switching it on or off is one line edited in place.
- *
- * Nothing else in the file moves: the declarations a switched-off harness keeps
- * are what let a sync find its old links and retire them.
+ * A machine's local file with each choice recorded only where it departs from
+ * the shared file, so the file holds this machine's decisions and nothing
+ * else. Whatever else the machine wrote there is kept.
  */
-
-const TOP_LEVEL = /^([A-Za-z0-9_-]+):\s*(#.*)?$/
-
-/** Where each harness block starts, and where the next one begins. */
-function blocks(lines: string[]): Map<string, { start: number; end: number }> {
-  const found = new Map<string, { start: number; end: number }>()
-  let current: { name: string; start: number } | undefined
-  for (const [i, line] of lines.entries()) {
-    const match = line.match(TOP_LEVEL)
-    if (match) {
-      if (current) found.set(current.name, { start: current.start, end: i })
-      current = { name: match[1], start: i }
-    }
-  }
-  if (current)
-    found.set(current.name, { start: current.start, end: lines.length })
-  return found
-}
-
-export function setEnabled({
-  text,
-  harness,
-  enabled,
+export function recordChoices({
+  shared,
+  local,
+  chosen,
 }: {
-  text: string
-  harness: string
-  enabled: boolean
-}): string {
-  const lines = text.split('\n')
-  const block = blocks(lines).get(harness)
-  if (!block)
-    throw new Error(`config/${ADAPTERS_YML} has no \`${harness}\` block`)
-
-  const content = lines.slice(block.start + 1, block.end)
-  const firstField = content.find(
-    line => /^\s+\S/.test(line) && !/^\s*#/.test(line),
-  )
-  const indent = firstField?.match(/^\s+/)?.[0] ?? '  '
-  const flag = `${indent}enabled: ${enabled}`
-  const existing = content.findIndex(line =>
-    line.startsWith(`${indent}enabled:`),
-  )
-
-  if (!enabled) {
-    if (existing === -1) lines.splice(block.start + 1, 0, flag)
-    else lines[block.start + 1 + existing] = flag
-  } else if (existing !== -1) {
-    // Drop the default unless it is the mapping's only field: an empty YAML
-    // block is null, which is not a harness configuration.
-    const hasOtherFields = content.some(
-      (line, i) => i !== existing && /^\s+[^\s#]/.test(line),
+  /** Whether the shared file alone switches each harness on. */
+  shared: Record<string, boolean>
+  local: Raw
+  chosen: Record<string, boolean>
+}): Raw {
+  const next = { ...local }
+  for (const [harness, enabled] of Object.entries(chosen)) {
+    const { enabled: _recorded, ...rest } = asRecord(
+      WHERE,
+      local[harness] ?? {},
     )
-    if (hasOtherFields) lines.splice(block.start + 1 + existing, 1)
-    else lines[block.start + 1 + existing] = flag
+    const entry = enabled === shared[harness] ? rest : { ...rest, enabled }
+    if (Object.keys(entry).length > 0) next[harness] = entry
+    else delete next[harness]
   }
-  return lines.join('\n')
+  return next
 }
 
-/** The harnesses the file currently switches off. */
-export function disabledHarnesses(text: string): string[] {
-  return Object.entries(parseAdaptersConfig(Bun.YAML.parse(text)))
-    .filter(([, cfg]) => cfg.enabled === false)
-    .map(([name]) => name)
-}
+const isEnabled = (cfg?: AdaptersConfig[string]): boolean =>
+  cfg?.enabled !== false
 
 /** What bootstrap offers: the harnesses the file declares, in its order. */
 export async function harnessChoices(): Promise<
@@ -90,7 +59,7 @@ export async function harnessChoices(): Promise<
   return Promise.all(
     Object.entries(declared).map(async ([name, cfg]) => ({
       name,
-      enabled: cfg.enabled !== false,
+      enabled: isEnabled(cfg),
       detail: await describe(name, cfg),
     })),
   )
@@ -114,23 +83,30 @@ async function describe(
 }
 
 /**
- * Write the choice back, touching only the harnesses whose answer changed, so
- * the diff is the decision and nothing else. A dry run stops before writing.
+ * Record the choice in this machine's local file, leaving the shared file as
+ * every machine has it. A dry run stops before writing.
  */
 export async function writeEnabled(
   chosen: Record<string, boolean>,
   mode: Mode = APPLY,
 ): Promise<string[]> {
-  const path = join(REPO, 'config', ADAPTERS_YML)
-  const before = await readFile(path, 'utf8')
-  const current = new Set(disabledHarnesses(before))
-  let after = before
-  const changed: string[] = []
-  for (const [harness, enabled] of Object.entries(chosen)) {
-    if (current.has(harness) === !enabled) continue
-    after = setEnabled({ text: after, harness, enabled })
-    changed.push(`${enabled ? 'on ' : 'off'}  ${harness}`)
-  }
-  if (after !== before && !mode.dryRun) await writeFile(path, after)
+  const current = await loadDeclaredHarnesses()
+  const changed = Object.entries(chosen)
+    .filter(([harness, enabled]) => enabled !== isEnabled(current[harness]))
+    .map(([harness, enabled]) => `${enabled ? 'on ' : 'off'}  ${harness}`)
+  if (changed.length === 0 || mode.dryRun) return changed
+
+  const shared = parseAdaptersConfig(readConfigFile(ADAPTERS_YML))
+  const local = asRecord(WHERE, readConfigFile(LOCAL_YML) ?? {})
+  writeConfigFile(
+    LOCAL_YML,
+    recordChoices({
+      shared: Object.fromEntries(
+        Object.entries(shared).map(([name, cfg]) => [name, isEnabled(cfg)]),
+      ),
+      local,
+      chosen,
+    }),
+  )
   return changed
 }

@@ -1,90 +1,53 @@
-import { describe, expect, test } from 'bun:test'
-import { disabledHarnesses, setEnabled } from './enabled'
+import { expect, test } from 'bun:test'
+import { recordChoices } from './enabled'
 
-const FILE = `claude:
-  personalisation:
-    - dest: '~/.claude/CLAUDE.md'
-      target: dist/claude/CLAUDE.md
+/** The shared file switches claude and codex on, and opencode off. */
+const SHARED = { claude: true, codex: true, opencode: false }
+const AS_SHARED = { claude: true, codex: true, opencode: false }
 
-codex:
-  personalisation:
-    - dest: '~/.codex/AGENTS.md'
-      target: dist/codex/AGENTS.md
-  mcp:
-    home: '~/.codex/'
-    enable: [shared-memory]
-
-pi:
-  personalisation:
-    - dest: '~/.pi/agent/AGENTS.md'
-      target: dist/pi/AGENTS.md
-`
-
-describe('setEnabled', () => {
-  test('writes the flag at the top of the block it belongs to', () => {
-    const after = setEnabled({ text: FILE, harness: 'codex', enabled: false })
-    expect(after).toContain('codex:\n  enabled: false\n  personalisation:')
-    expect(disabledHarnesses(after)).toEqual(['codex'])
-  })
-
-  test('leaves every other harness untouched', () => {
-    const after = setEnabled({ text: FILE, harness: 'codex', enabled: false })
-    const withoutFlag = after.replace('  enabled: false\n', '')
-    expect(withoutFlag).toBe(FILE)
-  })
-
-  test('drops the flag when switching a harness back on', () => {
-    const off = setEnabled({ text: FILE, harness: 'codex', enabled: false })
-    expect(setEnabled({ text: off, harness: 'codex', enabled: true })).toBe(
-      FILE,
-    )
-  })
-
-  test('is idempotent in both directions', () => {
-    const off = setEnabled({ text: FILE, harness: 'codex', enabled: false })
-    expect(setEnabled({ text: off, harness: 'codex', enabled: false })).toBe(
-      off,
-    )
-    expect(setEnabled({ text: FILE, harness: 'codex', enabled: true })).toBe(
-      FILE,
-    )
-  })
-
-  test('refuses a harness the file does not declare', () => {
-    expect(() =>
-      setEnabled({ text: FILE, harness: 'warp', enabled: false }),
-    ).toThrow('no `warp` block')
-  })
-
-  test('switches off the last harness in the file', () => {
-    const after = setEnabled({ text: FILE, harness: 'pi', enabled: false })
-    expect(disabledHarnesses(after)).toEqual(['pi'])
-    expect(after).toStartWith('claude:')
-    expect(after.trimEnd()).toEndWith('AGENTS.md')
-  })
+test.each([
+  [
+    'records nothing when every choice matches the shared file',
+    {},
+    AS_SHARED,
+    {},
+  ],
+  [
+    'records a harness switched off here',
+    {},
+    { ...AS_SHARED, codex: false },
+    { codex: { enabled: false } },
+  ],
+  [
+    'records a harness switched on here that the shared file switches off',
+    {},
+    { ...AS_SHARED, opencode: true },
+    { opencode: { enabled: true } },
+  ],
+  [
+    'forgets a choice that no longer departs from the shared file',
+    { codex: { enabled: false } },
+    AS_SHARED,
+    {},
+  ],
+  [
+    'keeps what else this machine wrote for a harness',
+    { codex: { enabled: false, skills: 'native' }, zed: { skills: 'native' } },
+    AS_SHARED,
+    { codex: { skills: 'native' }, zed: { skills: 'native' } },
+  ],
+  [
+    'leaves a harness nobody was asked about as it was recorded',
+    { codex: { enabled: false } },
+    { claude: true },
+    { codex: { enabled: false } },
+  ],
+])('%s', (_case, local, chosen, expected) => {
+  expect(recordChoices({ shared: SHARED, local, chosen })).toEqual(expected)
 })
 
-describe('disabledHarnesses', () => {
-  test('reports nothing when every harness is enabled', () => {
-    expect(disabledHarnesses(FILE)).toEqual([])
-  })
-
-  test('reports every harness switched off', () => {
-    const after = setEnabled({
-      text: setEnabled({ text: FILE, harness: 'claude', enabled: false }),
-      harness: 'pi',
-      enabled: false,
-    })
-    expect(disabledHarnesses(after)).toEqual(['claude', 'pi'])
-  })
+test('is idempotent', () => {
+  const chosen = { ...AS_SHARED, codex: false }
+  const once = recordChoices({ shared: SHARED, local: {}, chosen })
+  expect(recordChoices({ shared: SHARED, local: once, chosen })).toEqual(once)
 })
-
-for (const indent of ['  ', '    ']) {
-  test(`reads and re-enables a commented false flag with ${indent.length}-space indentation`, () => {
-    const text = `claude:\n${indent}enabled: false # unused here\n`
-    expect(disabledHarnesses(text)).toEqual(['claude'])
-    const after = setEnabled({ text, harness: 'claude', enabled: true })
-    expect(disabledHarnesses(after)).toEqual([])
-    expect(Bun.YAML.parse(after)).toEqual({ claude: { enabled: true } })
-  })
-}
