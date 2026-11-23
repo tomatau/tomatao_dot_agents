@@ -21,7 +21,7 @@ export async function perform(action: Action, fx: Effects): Promise<void> {
         fx.bankUrl(action.bank),
         action.init,
       )
-      for (const out of replies) fx.send(out)
+      if (action.relay) for (const out of replies) fx.send(out)
       return
     }
     case 'forward': {

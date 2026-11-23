@@ -78,6 +78,51 @@ describe('outside a git repo', () => {
   })
 })
 
+describe('started outside a git repo, by a client that supports roots', () => {
+  test('asks for roots rather than settling for no bank', () => {
+    const { actions } = run([initialize(withRoots), initialized])
+
+    expect(kinds(actions)).toEqual(['reply', 'ask-roots'])
+  })
+
+  test('adopts the bank roots name, without a second initialize reply', () => {
+    // Arrange & Act
+    const { session, actions } = run([
+      initialize(withRoots),
+      initialized,
+      toolsList,
+      { on: 'roots', bank: OTHER_REPO },
+    ])
+
+    // Assert: the held request is released against the bank roots named.
+    expect(kinds(actions)).toEqual([
+      'reply',
+      'ask-roots',
+      'connect',
+      'ensure-bank',
+      'forward',
+    ])
+    const connect = actions[2] as Extract<Action, { do: 'connect' }>
+    expect(connect).toMatchObject({ bank: OTHER_REPO, relay: false })
+    expect(session.bank).toBe(OTHER_REPO)
+  })
+
+  test('offers no tools when roots name no single repo', () => {
+    // Arrange & Act: undefined is also what a timeout reports.
+    const { actions } = run([
+      initialize(withRoots),
+      initialized,
+      toolsList,
+      { on: 'roots', bank: undefined },
+    ])
+
+    // Assert
+    expect(kinds(actions)).toEqual(['reply', 'ask-roots', 'reply'])
+    const reply = actions[2] as Extract<Action, { do: 'reply' }>
+    expect((reply.message.result as { tools: unknown[] }).tools).toEqual([])
+  })
+})
+
 describe('a client that does not support roots', () => {
   test('routes on the cwd bank without asking', () => {
     // Arrange & Act

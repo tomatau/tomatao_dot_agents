@@ -52,8 +52,10 @@ question of committing a pin does not arise.
 ## Bank identity
 
 Named after the git remote where there is one, else the root directory — the
-remote survives clones and directory renames, which a path does not. Outside a
-git repo the bridge exposes no tools rather than inventing a bank.
+remote survives clones and directory renames, which a path does not. Started
+outside a git repo, the bridge still asks for roots, and takes a bank only when
+every root names the same one. Otherwise it exposes no tools rather than
+inventing a bank.
 
 ## Still open
 
