@@ -117,7 +117,7 @@ describe('a file-backed harness configured for a CLI instead', () => {
     'tells %s what it is missing rather than guessing a path',
     (name, build) => {
       expect(() => build({ scope: 'user' } as McpConfig)).toThrow(
-        `config/adapters.yml: ${name} mcp needs \`file\``,
+        `config/adapters[.local].yml: ${name} mcp needs \`file\``,
       )
     },
   )

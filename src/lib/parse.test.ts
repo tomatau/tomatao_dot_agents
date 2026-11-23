@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { requireString, requireUrl, stringArray } from './parse'
+import { asRecordOf, requireString, requireUrl, stringArray } from './parse'
 
 const WHERE = 'config/example.yml'
 
@@ -65,5 +65,22 @@ describe('stringArray', () => {
     ['populated', { args: ['--path', '/mcp/'] }, ['--path', '/mcp/']],
   ])('reads args that are %s', (_case, raw, expectedArgs) => {
     expect(stringArray(WHERE, raw, 'args')).toEqual(expectedArgs)
+  })
+})
+
+describe('asRecordOf', () => {
+  const KEYS = ['dir', 'name']
+
+  test('rejects a key its reader does not know', () => {
+    const misspelt = { dir: '~/vault', nmae: 'notes' }
+    expectRejection(
+      () => asRecordOf(WHERE, misspelt, KEYS),
+      'unknown key `nmae`',
+    )
+  })
+
+  test('returns a mapping holding only known keys, some of them absent', () => {
+    const partial = { dir: '~/vault' }
+    expect(asRecordOf(WHERE, partial, KEYS)).toEqual(partial)
   })
 })

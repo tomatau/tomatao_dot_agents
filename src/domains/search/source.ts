@@ -2,8 +2,7 @@ import { existsSync } from 'node:fs'
 import type { McpResolver, McpServer } from '../../lib/mcp'
 import type { SearchIndex } from '../../settings/search'
 import { requireString } from '../../lib/parse'
-import { loadSearchIndexes } from '../../settings/search'
-import { SEARCH_LOCAL_YML, configWhere } from '../../settings/yaml'
+import { SEARCH_WHERE, loadSearchIndexes } from '../../settings/search'
 
 /**
  * The stdio server, with its indexes passed as one JSON argument. It runs in
@@ -22,7 +21,7 @@ export function searchServer(
   const missing = indexes.find(index => !exists(index.db))
   if (missing) {
     throw new Error(
-      `${configWhere(SEARCH_LOCAL_YML)}: index \`${missing.name}\` has no database at ${missing.db}`,
+      `${SEARCH_WHERE}: index \`${missing.name}\` has no database at ${missing.db}`,
     )
   }
   const pinned = Object.fromEntries(

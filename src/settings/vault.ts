@@ -1,18 +1,17 @@
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
-import { asRecord, requireString } from '../lib/parse'
+import { asRecordOf, requireString } from '../lib/parse'
 import {
-  VAULT_LOCAL_YML,
   VAULT_YML,
   configWhere,
+  localConfigName,
   readConfigYaml,
-  readLocalConfigYaml,
   resolvePath,
 } from './yaml'
 
 const WHERE = configWhere(VAULT_YML)
-const LOCAL_WHERE = configWhere(VAULT_LOCAL_YML)
-const NO_VAULT = `no vault declared: set \`dir\` in ${LOCAL_WHERE}`
+const NO_VAULT = `no vault declared: set \`dir\` in config/${localConfigName(VAULT_YML)}`
+const KEYS = ['syncConfig', 'searchConfig', 'dir']
 
 export interface VaultConfig {
   /** Vault-relative path to the note declaring what is in sync scope. */
@@ -21,16 +20,19 @@ export interface VaultConfig {
   searchConfig: string
 }
 
+function declaredVault(): Record<string, unknown> {
+  return asRecordOf(WHERE, readConfigYaml(VAULT_YML) ?? {}, KEYS)
+}
+
 /**
- * Where this machine keeps its vault. The location differs per host, so it is
- * declared beside the shared vault config in a file git ignores. A machine
- * without that file has no vault.
+ * Where this machine keeps its vault. The location differs per host, so each
+ * machine declares it in its local file. A machine that declares none has no
+ * vault.
  */
 function declaredVaultDir(): string | undefined {
-  const declared = readLocalConfigYaml(VAULT_LOCAL_YML)
-  if (declared === undefined) return undefined
-  const raw = asRecord(LOCAL_WHERE, declared ?? {})
-  return resolvePath(requireString(LOCAL_WHERE, raw, 'dir'))
+  const raw = declaredVault()
+  if (raw.dir === undefined) return undefined
+  return resolvePath(requireString(WHERE, raw, 'dir'))
 }
 
 export function vaultDir(): string {
@@ -40,7 +42,7 @@ export function vaultDir(): string {
 }
 
 export async function loadVaultConfig(): Promise<VaultConfig> {
-  const raw = asRecord(WHERE, (await readConfigYaml(VAULT_YML)) ?? {})
+  const raw = declaredVault()
   return {
     syncConfig: requireString(WHERE, raw, 'syncConfig'),
     searchConfig: requireString(WHERE, raw, 'searchConfig'),

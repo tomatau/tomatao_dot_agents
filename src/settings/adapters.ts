@@ -1,9 +1,10 @@
 import type { McpConfig } from './mcp'
-import { asRecord, requireString } from '../lib/parse'
-import { parseMcpConfig } from './mcp'
+import { asRecord, asRecordOf, requireString } from '../lib/parse'
+import { MCP_KEYS, parseMcpConfig } from './mcp'
 import { ADAPTERS_YML, configWhere, readConfigYaml, resolvePath } from './yaml'
 
 const WHERE = configWhere(ADAPTERS_YML)
+const HARNESS_KEYS = ['enabled', 'personalisation', 'skills', 'mcp']
 
 export interface AdapterLink {
   dest: string
@@ -30,7 +31,7 @@ function parseLinks(where: string, value: unknown): AdapterLink[] {
     throw new Error(`${where}: expected a list of links`)
   return value.map((entry, i) => {
     const at = `${where}: link ${i + 1}`
-    const raw = asRecord(at, entry)
+    const raw = asRecordOf(at, entry, ['dest', 'target'])
     return {
       dest: resolvePath(requireString(at, raw, 'dest')),
       target: resolvePath(requireString(at, raw, 'target')),
@@ -54,7 +55,7 @@ function parseEnabled(where: string, value: unknown): boolean | undefined {
 
 function parseHarness(name: string, value: unknown): HarnessConfig {
   const where = `${WHERE}: ${name}`
-  const raw = asRecord(where, value)
+  const raw = asRecordOf(where, value, HARNESS_KEYS)
   return {
     enabled: parseEnabled(where, raw.enabled),
     personalisation:
@@ -65,7 +66,7 @@ function parseHarness(name: string, value: unknown): HarnessConfig {
     mcp:
       raw.mcp === undefined
         ? undefined
-        : parseMcpConfig(name, asRecord(`${where} mcp`, raw.mcp)),
+        : parseMcpConfig(name, asRecordOf(`${where} mcp`, raw.mcp, MCP_KEYS)),
   }
 }
 
@@ -78,7 +79,7 @@ export function parseAdaptersConfig(value: unknown): AdaptersConfig {
 
 /** Every harness the file lists, enabled or not — what bootstrap asks about. */
 export async function loadDeclaredHarnesses(): Promise<AdaptersConfig> {
-  return parseAdaptersConfig(await readConfigYaml(ADAPTERS_YML))
+  return parseAdaptersConfig(readConfigYaml(ADAPTERS_YML))
 }
 
 /**

@@ -52,6 +52,21 @@ export function asRecord(
   return value as Record<string, unknown>
 }
 
+/**
+ * A mapping holding only the keys its reader knows. A misspelt key would
+ * otherwise read as a setting nobody made.
+ */
+export function asRecordOf(
+  where: string,
+  value: unknown,
+  keys: readonly string[],
+): Record<string, unknown> {
+  const raw = asRecord(where, value)
+  const unknown = Object.keys(raw).find(key => !keys.includes(key))
+  if (unknown) throw new Error(`${where}: unknown key \`${unknown}\``)
+  return raw
+}
+
 /** A required list, left unexamined; the caller checks its items. */
 export function requireList(
   where: string,
