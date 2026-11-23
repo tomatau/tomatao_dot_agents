@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { overlay } from '../lib/overlay'
@@ -11,6 +11,7 @@ export const HINDSIGHT_YML = 'hindsight.yml'
 export const VAULT_YML = 'vault.yml'
 export const SEARCH_YML = 'search.yml'
 
+const YAML_INDENT = 2
 const SUFFIX = '.yml'
 const LOCAL = '.local'
 const LOCAL_SUFFIX = `${LOCAL}${SUFFIX}`
@@ -38,11 +39,18 @@ export const localConfigName = (file: string): string =>
 export const isLocalConfig = (file: string): boolean =>
   file.endsWith(LOCAL_SUFFIX)
 
-/** A config file's content, or `undefined` when it is absent or empty. */
-function readYaml(file: string): unknown {
+/** One config file's own content, or `undefined` when it is absent or empty. */
+export function readConfigFile(file: string): unknown {
   const path = join(CONFIG_DIR, file)
   if (!existsSync(path)) return undefined
   return Bun.YAML.parse(readFileSync(path, 'utf8')) ?? undefined
+}
+
+/** Replace one config file. Comments and layout in it are not kept. */
+export function writeConfigFile(file: string, value: unknown): void {
+  const yaml = Bun.YAML.stringify(value, null, YAML_INDENT)
+  const lines = yaml.split('\n').map(line => line.trimEnd())
+  writeFileSync(join(CONFIG_DIR, file), `${lines.join('\n')}\n`)
 }
 
 /**
@@ -50,5 +58,5 @@ function readYaml(file: string): unknown {
  * Either may be absent. The caller validates what it finds.
  */
 export function readConfigYaml(file: string): unknown {
-  return overlay(readYaml(file), readYaml(localConfigName(file)))
+  return overlay(readConfigFile(file), readConfigFile(localConfigName(file)))
 }
