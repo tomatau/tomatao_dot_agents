@@ -40,12 +40,23 @@ export async function projectBankId(cwd: string): Promise<string | undefined> {
   return `project-${normalise(slug)}`
 }
 
-/** The bank named by the first root a client reports, if it names one. */
+/**
+ * The bank every root a client reports agrees on. Roots naming more than one
+ * repo, or any root outside a repo, name none: the bridge cannot tell which of
+ * them the session is about.
+ */
 export async function rootBankId(
   message: JsonRpc,
 ): Promise<string | undefined> {
-  const uri = (message.result as { roots?: { uri?: string }[] })?.roots?.[0]
-    ?.uri
-  if (!uri?.startsWith('file://')) return undefined
-  return projectBankId(decodeURIComponent(new URL(uri).pathname))
+  const roots = (message.result as { roots?: { uri?: string }[] })?.roots ?? []
+  const banks = new Set(
+    await Promise.all(
+      roots.map(({ uri }) =>
+        uri?.startsWith('file://')
+          ? projectBankId(decodeURIComponent(new URL(uri).pathname))
+          : undefined,
+      ),
+    ),
+  )
+  return banks.size === 1 ? [...banks][0] : undefined
 }
