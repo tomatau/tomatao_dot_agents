@@ -1,66 +1,116 @@
 import type { JsonRpc } from '../../clients/mcp-http'
 import type { Action, Event, Session } from './protocol'
-import { idle } from './protocol'
+import { CATALOGUE_BANK, idle, noProject, withoutProjectPath } from './protocol'
 
-/** Fix the bank, then release everything that arrived while it was unsettled. */
-function settle(session: Session, rooted?: string): [Session, Action[]] {
-  const bank = rooted ?? session.bank
-  const settled = { ...session, bank, awaitingRoots: false, queued: [] }
-  if (!bank) return [settled, session.queued.flatMap(idle)]
+function forward(session: Session, message: JsonRpc): Action[] {
+  const { init, route } = session
+  if (!init) return idle(message)
 
-  const actions: Action[] = []
-  if (!session.bank) {
-    // The client already has our own initialize reply, so it must not get Hindsight's too.
-    if (session.init) {
-      actions.push({ do: 'connect', bank, init: session.init, relay: false })
+  if (route.kind === 'per-call') {
+    if (message.method === 'tools/call') {
+      return [{ do: 'resolve-project', message }]
     }
-  } else if (rooted && rooted !== session.bank) {
-    actions.push({
-      do: 'log',
-      line: `roots says ${rooted}, cwd said ${session.bank}`,
-    })
-    if (session.init) {
-      actions.push({ do: 'connect', bank, init: session.init, relay: true })
-    }
-  }
-  actions.push({ do: 'ensure-bank', bank })
-  for (const message of session.queued) actions.push({ do: 'forward', message })
-  return [settled, actions]
-}
-
-function onMessage(session: Session, message: JsonRpc): [Session, Action[]] {
-  if (message.method === 'initialize') {
-    const caps = (message.params as { capabilities?: { roots?: unknown } })
-      ?.capabilities
-    const next = {
-      ...session,
-      init: message,
-      wantsRoots: caps?.roots !== undefined,
-    }
-    if (!session.bank) return [next, idle(message)]
-    // Forwarded, never synthesised, so the client sees the real capabilities and
-    // they cannot drift as Hindsight is upgraded.
     return [
-      next,
-      [{ do: 'connect', bank: session.bank, init: message, relay: true }],
+      {
+        do: message.method === 'tools/list' ? 'list-tools' : 'forward',
+        bank: CATALOGUE_BANK,
+        init,
+        message,
+      },
     ]
   }
 
-  // Only once the client is initialised may a server make requests of it.
-  if (message.method === 'notifications/initialized') {
-    if (!session.wantsRoots) return settle(session)
-    return [{ ...session, awaitingRoots: true }, [{ do: 'ask-roots' }]]
+  const bank = route.kind === 'fixed' ? route.bank : route.cwdBank
+  return bank ? [{ do: 'forward', bank, init, message }] : idle(message)
+}
+
+function settle(
+  session: Session,
+  bank: string | undefined,
+  queued: JsonRpc[],
+): [Session, Action[]] {
+  const next: Session = {
+    ...session,
+    route: bank ? { kind: 'fixed', bank } : { kind: 'per-call' },
+  }
+  const announce: Action = bank
+    ? { do: 'ensure-bank', bank }
+    : { do: 'log', line: 'no repo settled; each call names its own' }
+  return [
+    next,
+    [announce, ...queued.flatMap(message => forward(next, message))],
+  ]
+}
+
+function onProject(
+  session: Session,
+  event: Extract<Event, { on: 'project' }>,
+): [Session, Action[]] {
+  const { bank, message, path } = event
+  const { init, route } = session
+  if (route.kind !== 'per-call' || !init || !bank) {
+    return [session, [noProject(message.id, path)]]
+  }
+  return [
+    session,
+    [
+      { do: 'ensure-bank', bank },
+      { do: 'forward', bank, init, message: withoutProjectPath(message) },
+    ],
+  ]
+}
+
+function onMessage(session: Session, message: JsonRpc): [Session, Action[]] {
+  const { route } = session
+  if (route.kind === 'starting' && message.method === 'initialize') {
+    const { cwdBank } = route
+    const actions: Action[] = cwdBank
+      ? [{ do: 'connect', bank: cwdBank, init: message }]
+      : idle(message)
+    return [{ ...session, init: message }, actions]
   }
 
-  if (session.awaitingRoots) {
-    return [{ ...session, queued: [...session.queued, message] }, []]
+  if (
+    route.kind === 'starting' &&
+    message.method === 'notifications/initialized'
+  ) {
+    const caps = (
+      session.init?.params as { capabilities?: { roots?: unknown } }
+    )?.capabilities
+    if (caps?.roots === undefined) return settle(session, route.cwdBank, [])
+    return [
+      { ...session, route: { ...route, kind: 'waiting', queued: [] } },
+      [{ do: 'ask-roots' }],
+    ]
   }
-  if (!session.bank) return [session, idle(message)]
-  return [session, [{ do: 'forward', message }]]
+
+  if (route.kind === 'waiting') {
+    return [
+      { ...session, route: { ...route, queued: [...route.queued, message] } },
+      [],
+    ]
+  }
+  return [session, forward(session, message)]
 }
 
 /** The whole decision surface: a session and an event become the next of each. */
 export function step(session: Session, event: Event): [Session, Action[]] {
-  if (event.on === 'roots') return settle(session, event.bank)
+  if (event.on === 'roots') {
+    const { route } = session
+    if (route.kind !== 'waiting') return [session, []]
+    const [next, actions] = settle(
+      session,
+      event.bank ?? route.cwdBank,
+      route.queued,
+    )
+    if (event.bank && route.cwdBank && event.bank !== route.cwdBank) {
+      actions.unshift({
+        do: 'log',
+        line: `roots says ${event.bank}, cwd said ${route.cwdBank}`,
+      })
+    }
+    return [next, actions]
+  }
+  if (event.on === 'project') return onProject(session, event)
   return onMessage(session, event.message)
 }

@@ -1,7 +1,8 @@
+// unit: unreachable
 import { describe, expect, test } from 'bun:test'
 import type { Action, Event, Session } from './protocol'
 import { step } from './decide'
-import { newSession } from './protocol'
+import { CATALOGUE_BANK, newSession, PROJECT_PATH } from './protocol'
 
 const THIS_REPO = 'project-here'
 const OTHER_REPO = 'project-there'
@@ -27,6 +28,24 @@ const toolsList: Event = {
   on: 'message',
   message: { jsonrpc: '2.0', id: 2, method: 'tools/list' },
 }
+
+const pathCallMessage = {
+  jsonrpc: '2.0',
+  id: 3,
+  method: 'tools/call',
+  params: {
+    name: 'recall',
+    arguments: { query: 'why', [PROJECT_PATH]: '/code/there' },
+  },
+}
+const pathCall: Event = { on: 'message', message: pathCallMessage }
+/** What the shell reports once it has resolved a call's path with git. */
+const projectFound = (bank?: string): Event => ({
+  on: 'project',
+  message: pathCallMessage,
+  path: '/code/there',
+  bank,
+})
 
 const withRoots = { roots: {} }
 const withoutRoots = {}
@@ -63,18 +82,63 @@ describe('outside a git repo', () => {
     ).toBe(expectedName)
   })
 
-  test('offers no tools rather than inventing a bank', () => {
-    const { actions } = run([initialize(withoutRoots), toolsList])
+  test('falls back to calls naming their repo, connected only to list tools', () => {
+    // Arrange & Act
+    const { session, actions } = run([
+      initialize(withoutRoots),
+      initialized,
+      toolsList,
+    ])
 
-    const reply = actions[1] as Extract<Action, { do: 'reply' }>
-    expect((reply.message.result as { tools: unknown[] }).tools).toEqual([])
+    // Assert
+    expect(kinds(actions)).toEqual(['reply', 'log', 'list-tools'])
+    expect(actions[2]).toMatchObject({ bank: CATALOGUE_BANK })
+    expect(session.route.kind).toBe('per-call')
   })
 
-  test('never reaches for a bank', () => {
-    const { actions } = run([initialize(withoutRoots), initialized, toolCall])
+  test('resolves the repo a call names before reaching any bank', () => {
+    const { actions } = run([initialize(withoutRoots), initialized, pathCall])
 
-    expect(kinds(actions)).not.toContain('ensure-bank')
-    expect(kinds(actions)).not.toContain('forward')
+    expect(kinds(actions)).toEqual(['reply', 'log', 'resolve-project'])
+  })
+
+  test('routes a call to the bank its path names, without the path', () => {
+    // Arrange & Act
+    const { actions } = run([
+      initialize(withoutRoots),
+      initialized,
+      projectFound(OTHER_REPO),
+    ])
+
+    expect(actions.slice(2)).toMatchObject([
+      { do: 'ensure-bank', bank: OTHER_REPO },
+      {
+        do: 'forward',
+        bank: OTHER_REPO,
+        message: { params: { name: 'recall', arguments: { query: 'why' } } },
+      },
+    ])
+    const forward = actions[3]
+    if (forward.do !== 'forward') throw new Error('Expected a forwarded call')
+    expect(forward.message.params).toEqual({
+      name: 'recall',
+      arguments: { query: 'why' },
+    })
+  })
+
+  test('refuses a call whose path names no repo, reaching no bank', () => {
+    // Arrange & Act
+    const { actions } = run([
+      initialize(withoutRoots),
+      initialized,
+      projectFound(undefined),
+    ])
+
+    // Assert
+    const expectedCode = -32002
+    expect(kinds(actions.slice(2))).toEqual(['reply'])
+    const reply = actions[2] as Extract<Action, { do: 'reply' }>
+    expect((reply.message.error as { code: number }).code).toBe(expectedCode)
   })
 })
 
@@ -98,28 +162,40 @@ describe('started outside a git repo, by a client that supports roots', () => {
     expect(kinds(actions)).toEqual([
       'reply',
       'ask-roots',
-      'connect',
       'ensure-bank',
       'forward',
     ])
-    const connect = actions[2] as Extract<Action, { do: 'connect' }>
-    expect(connect).toMatchObject({ bank: OTHER_REPO, relay: false })
-    expect(session.bank).toBe(OTHER_REPO)
+    expect(actions.at(-1)).toMatchObject({ bank: OTHER_REPO })
+    expect(session.route).toEqual({ kind: 'fixed', bank: OTHER_REPO })
   })
 
-  test('offers no tools when roots name no single repo', () => {
+  test('falls back to calls naming their repo when roots name no single repo', () => {
     // Arrange & Act: undefined is also what a timeout reports.
-    const { actions } = run([
+    const { session, actions } = run([
       initialize(withRoots),
       initialized,
       toolsList,
       { on: 'roots', bank: undefined },
     ])
 
-    // Assert
-    expect(kinds(actions)).toEqual(['reply', 'ask-roots', 'reply'])
-    const reply = actions[2] as Extract<Action, { do: 'reply' }>
-    expect((reply.message.result as { tools: unknown[] }).tools).toEqual([])
+    // Assert: the held listing is released through the fallback.
+    expect(kinds(actions)).toEqual(['reply', 'ask-roots', 'log', 'list-tools'])
+    expect(session.route.kind).toBe('per-call')
+  })
+
+  test('keeps per-call routing when roots replies after the timeout', () => {
+    const { actions } = run([
+      initialize(withRoots),
+      initialized,
+      { on: 'roots' },
+      { on: 'roots', bank: THIS_REPO },
+      toolsList,
+    ])
+
+    expect(actions.slice(2)).toMatchObject([
+      { do: 'log' },
+      { do: 'list-tools', bank: CATALOGUE_BANK },
+    ])
   })
 })
 
@@ -166,10 +242,13 @@ describe('a client that supports roots', () => {
 
     // Assert: nothing was answered against the guess.
     expect(kinds(actions)).toEqual(['connect', 'ask-roots'])
-    expect(session.queued).toHaveLength(1)
+    expect(session.route).toMatchObject({
+      kind: 'waiting',
+      queued: [toolCall.message],
+    })
   })
 
-  test('switches bank and reconnects when roots disagrees with cwd', () => {
+  test('forwards to the bank named by roots when it disagrees with cwd', () => {
     // Arrange & Act
     const { session, actions } = run(
       [
@@ -186,22 +265,11 @@ describe('a client that supports roots', () => {
       'connect',
       'ask-roots',
       'log',
-      'connect',
       'ensure-bank',
       'forward',
     ])
-    expect(session.bank).toBe(OTHER_REPO)
-  })
-
-  test('reconnects to the bank roots named', () => {
-    const { actions } = run(
-      [initialize(withRoots), initialized, { on: 'roots', bank: OTHER_REPO }],
-      THIS_REPO,
-    )
-
-    const connects = actions.filter(a => a.do === 'connect')
-    const reconnect = connects.at(-1) as Extract<Action, { do: 'connect' }>
-    expect(reconnect.bank).toBe(OTHER_REPO)
+    expect(actions.at(-1)).toMatchObject({ bank: OTHER_REPO })
+    expect(session.route).toEqual({ kind: 'fixed', bank: OTHER_REPO })
   })
 
   test.each([
@@ -226,6 +294,7 @@ describe('a client that supports roots', () => {
       'ensure-bank',
       'forward',
     ])
-    expect(session.bank).toBe(THIS_REPO)
+    expect(actions.at(-1)).toMatchObject({ bank: THIS_REPO })
+    expect(session.route).toEqual({ kind: 'fixed', bank: THIS_REPO })
   })
 })

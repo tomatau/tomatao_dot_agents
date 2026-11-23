@@ -56,6 +56,16 @@ export class McpUpstream {
     return out
   }
 
+  /** Send only after the session for this endpoint has opened. */
+  async postTo(
+    url: string,
+    init: JsonRpc,
+    message: JsonRpc,
+  ): Promise<JsonRpc[]> {
+    if (this.current?.url !== url) await this.connect(url, init)
+    return this.post(message)
+  }
+
   async post(message: JsonRpc): Promise<JsonRpc[]> {
     return (await this.current?.post(message)) ?? []
   }
