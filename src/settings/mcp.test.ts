@@ -5,7 +5,7 @@ import type { McpConfig } from './mcp'
 import { mcpTarget, parseMcpConfig } from './mcp'
 
 const NEEDS_ONE =
-  'config/adapters.yml: cursor mcp needs exactly one of `scope`, `home`, or `file`'
+  'config/adapters[.local].yml: cursor mcp needs exactly one of `scope`, `home`, or `file`'
 
 describe('reading a harness mcp block', () => {
   test.each([
@@ -27,7 +27,7 @@ describe('reading a harness mcp block', () => {
 
   test('rejects a target that is present but empty', () => {
     expect(() => parseMcpConfig('cursor', { file: '   ' })).toThrow(
-      'config/adapters.yml: cursor mcp: missing `file`',
+      'config/adapters[.local].yml: cursor mcp: missing `file`',
     )
   })
 
@@ -61,7 +61,7 @@ describe('reading the target back', () => {
 
     // Act & Assert
     expect(() => mcpTarget('codex', fileBacked, 'home')).toThrow(
-      'config/adapters.yml: codex mcp needs `home`',
+      'config/adapters[.local].yml: codex mcp needs `home`',
     )
   })
 })

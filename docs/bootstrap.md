@@ -24,11 +24,13 @@ leaves it absent.
 Any `config/<name>.yml` can be adjusted for one machine in a gitignored
 `config/<name>.local.yml` beside it. The local file is laid over the shared one:
 mappings merge key by key at every depth, and a scalar or a list replaces the
-shared value whole. Either file may be absent.
+shared value whole. Either file may be absent. A key a config does not know is
+refused, so a misspelt setting is not mistaken for one nobody made. A fault is
+reported against `config/<name>[.local].yml`, as it may sit in either file.
 
-`config/vault.local.yml` is gitignored, because a vault sits somewhere different
-on each machine. A machine without the file has no vault: bootstrap and sync
-skip the vault-fed steps and set everything else up.
+A vault sits somewhere different on each machine, so its `dir` belongs in
+`config/vault.local.yml`. A machine that sets no `dir` has no vault: bootstrap
+and sync skip the vault-fed steps and set everything else up.
 
 ## Run setup
 

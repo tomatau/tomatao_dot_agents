@@ -1,4 +1,9 @@
-import { asRecord, requireList, requireString, requireUrl } from '../lib/parse'
+import {
+  asRecordOf,
+  requireList,
+  requireString,
+  requireUrl,
+} from '../lib/parse'
 import { readSettingsFile } from './local'
 import { HINDSIGHT_ENV_LOCAL } from './paths'
 import { HINDSIGHT_YML, configWhere, readConfigYaml } from './yaml'
@@ -27,7 +32,7 @@ export interface HindsightConfig {
 
 function parseBank(where: string, value: unknown, index: number): BankConfig {
   const at = `${where}: bank ${index + 1}`
-  const raw = asRecord(at, value)
+  const raw = asRecordOf(at, value, ['id', 'access'])
   const access = requireString(at, raw, 'access')
   if (!ACCESS.includes(access as BankConfig['access'])) {
     throw new Error(`${at}: \`access\` must be ${ACCESS.join(' or ')}`)
@@ -39,7 +44,10 @@ function parseBank(where: string, value: unknown, index: number): BankConfig {
 }
 
 export async function loadHindsightConfig(): Promise<HindsightConfig> {
-  const raw = asRecord(WHERE, (await readConfigYaml(HINDSIGHT_YML)) ?? {})
+  const raw = asRecordOf(WHERE, readConfigYaml(HINDSIGHT_YML) ?? {}, [
+    'url',
+    'banks',
+  ])
   return {
     url: requireUrl(WHERE, raw, 'url'),
     banks: requireList(WHERE, raw, 'banks').map((bank, i) =>

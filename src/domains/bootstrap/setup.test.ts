@@ -14,7 +14,14 @@ import { basename, dirname, join } from 'node:path'
 import { run } from '../../lib/shell'
 import { REPO } from '../../settings/paths'
 import { loadVaultConfig } from '../../settings/vault'
-import { VAULT_LOCAL_YML, configWhere } from '../../settings/yaml'
+import {
+  VAULT_YML,
+  configWhere,
+  isLocalConfig,
+  localConfigName,
+} from '../../settings/yaml'
+
+const VAULT_LOCAL_YML = localConfigName(VAULT_YML)
 
 const OFFLINE_SETTINGS =
   'HINDSIGHT_API_LLM_PROVIDER=sh\nHINDSIGHT_API_URL=http://127.0.0.1:1\n'
@@ -31,10 +38,10 @@ async function fixture(name: string): Promise<string> {
   const path = join(root, name)
   await mkdir(path)
   await cp(join(REPO, 'src'), join(path, 'src'), { recursive: true })
-  // A fixture starts without a vault, whatever this machine declares.
+  // A fixture starts from the shared config, whatever this machine declares.
   await cp(join(REPO, 'config'), join(path, 'config'), {
     recursive: true,
-    filter: source => basename(source) !== VAULT_LOCAL_YML,
+    filter: source => !isLocalConfig(basename(source)),
   })
   await symlink(join(REPO, 'node_modules'), join(path, 'node_modules'))
   await mkdir(join(path, 'personalisation'))
@@ -136,12 +143,12 @@ test.skipIf(process.platform !== 'darwin')(
   },
 )
 
-test('a vault declared without a location stops bootstrap in preflight', async () => {
+test('a misspelt vault setting stops bootstrap in preflight', async () => {
   // Arrange
-  const path = await fixture('vault-without-location')
+  const path = await fixture('misspelt-vault-setting')
   await writeFile(join(path, 'hindsight/env.local'), OFFLINE_SETTINGS)
   await writeFile(join(path, 'config', VAULT_LOCAL_YML), 'path: ~/vault\n')
-  const expectedFault = `${configWhere(VAULT_LOCAL_YML)}: missing \`dir\``
+  const expectedFault = `${configWhere(VAULT_YML)}: unknown key \`path\``
   const firstStepAfterPreflight = 'remotes'
 
   // Act

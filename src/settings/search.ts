@@ -1,12 +1,7 @@
-import { asRecord, requireString } from '../lib/parse'
-import {
-  SEARCH_LOCAL_YML,
-  configWhere,
-  readLocalConfigYaml,
-  resolvePath,
-} from './yaml'
+import { asRecord, asRecordOf, requireString } from '../lib/parse'
+import { SEARCH_YML, configWhere, readConfigYaml, resolvePath } from './yaml'
 
-const WHERE = configWhere(SEARCH_LOCAL_YML)
+export const SEARCH_WHERE = configWhere(SEARCH_YML)
 
 export interface SearchIndex {
   /** What an agent passes to choose this index. */
@@ -19,17 +14,15 @@ export interface SearchIndex {
 
 /**
  * The indexes declared in `raw`, each a name mapped to its database and
- * description. A database path follows `resolvePath`.
+ * description. A database path follows `resolvePath`. Declaring none, in any
+ * form, offers none.
  */
 export function parseSearchIndexes(raw: unknown): SearchIndex[] {
-  const indexes = asRecord(WHERE, asRecord(WHERE, raw ?? {}).indexes ?? {})
-  const entries = Object.entries(indexes)
-  if (entries.length === 0) {
-    throw new Error(`${WHERE}: \`indexes\` must declare at least one index`)
-  }
-  return entries.map(([name, value]) => {
-    const at = `${WHERE}: index \`${name}\``
-    const index = asRecord(at, value)
+  const { indexes } = asRecordOf(SEARCH_WHERE, raw ?? {}, ['indexes'])
+  const declared = asRecord(SEARCH_WHERE, indexes ?? {})
+  return Object.entries(declared).map(([name, value]) => {
+    const at = `${SEARCH_WHERE}: index \`${name}\``
+    const index = asRecordOf(at, value, ['db', 'description'])
     return {
       name,
       db: resolvePath(requireString(at, index, 'db')),
@@ -38,12 +31,7 @@ export function parseSearchIndexes(raw: unknown): SearchIndex[] {
   })
 }
 
-/**
- * The indexes this machine offers agents. The databases sit in different
- * places on each machine, so they are declared in a file git ignores. A
- * machine without that file offers none.
- */
+/** The indexes this machine offers agents. */
 export function loadSearchIndexes(): SearchIndex[] {
-  const declared = readLocalConfigYaml(SEARCH_LOCAL_YML)
-  return declared === undefined ? [] : parseSearchIndexes(declared)
+  return parseSearchIndexes(readConfigYaml(SEARCH_YML))
 }

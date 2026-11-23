@@ -10,6 +10,7 @@ export type McpTarget = { scope: string } | { home: string } | { file: string }
 
 const WHERE = configWhere(ADAPTERS_YML)
 const TARGETS = ['scope', 'home', 'file'] as const
+export const MCP_KEYS = [...TARGETS, 'enable']
 
 /** Settings for pinning MCP servers into one harness. */
 export type McpConfig = McpTarget & {

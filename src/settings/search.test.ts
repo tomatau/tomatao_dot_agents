@@ -33,8 +33,12 @@ test('reads each index, resolving its database like other config paths', () => {
 })
 
 test.each([
-  ['an empty file', null, '`indexes` must declare at least one index'],
-  ['no indexes', { indexes: {} }, '`indexes` must declare at least one index'],
+  ['a misspelt key', { indexs: {} }, 'unknown key `indexs`'],
+  [
+    'a misspelt index setting',
+    { indexes: { notes: { db: 'x.db', descripton: 'x' } } },
+    'index `notes`: unknown key `descripton`',
+  ],
   ['indexes as a list', { indexes: ['notes'] }, 'expected a mapping'],
   [
     'an index without a database',
@@ -49,4 +53,12 @@ test.each([
 ])('refuses %s', (_case, raw, message) => {
   // Act / Assert
   expect(() => parseSearchIndexes(raw)).toThrow(message)
+})
+
+test.each([
+  ['nothing declared', undefined],
+  ['an empty file', null],
+  ['an empty `indexes`', { indexes: {} }],
+])('offers no indexes for %s', (_case, raw) => {
+  expect(parseSearchIndexes(raw)).toEqual([])
 })
