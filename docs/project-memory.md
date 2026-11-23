@@ -54,8 +54,14 @@ question of committing a pin does not arise.
 Named after the git remote where there is one, else the root directory — the
 remote survives clones and directory renames, which a path does not. Started
 outside a git repo, the bridge still asks for roots, and takes a bank only when
-every root names the same one. Otherwise it exposes no tools rather than
-inventing a bank.
+every root names the same one.
+
+When neither settles a bank, every tool gains a required `project_path`: the
+agent knows which repo it is working in even when the harness does not say. Each
+call's path is named by the same rule, and the argument is removed before the
+call reaches Hindsight. A path outside a git repo is refused rather than given
+a bank. Until a call names one, the tools are listed from a placeholder that no
+real bank can be called, and listing creates no bank.
 
 ## Still open
 
