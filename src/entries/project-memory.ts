@@ -38,7 +38,7 @@ const fx = {
   send: (message: JsonRpc) =>
     void process.stdout.write(`${JSON.stringify(message)}\n`),
   log,
-  upstream: new McpUpstream(),
+  upstream: new McpUpstream(url => void log(`session lost; reopened ${url}`)),
   bankUrl: (bank: string) => `${base}${bankPath.replaceAll('{bank}', bank)}`,
   rootsRequest: { jsonrpc: '2.0', id: ROOTS_ID, method: 'roots/list' },
   bankFor: projectBankId,
