@@ -7,7 +7,7 @@ const INTERNAL = -32603
 /** What the shell should do next. Every effect the bridge has is one of these. */
 export type Action =
   | { do: 'reply'; message: JsonRpc }
-  | { do: 'connect'; bank: string; init: JsonRpc }
+  | { do: 'connect'; bank: string; init: JsonRpc; relay: boolean }
   | { do: 'forward'; message: JsonRpc }
   | { do: 'ask-roots' }
   | { do: 'ensure-bank'; bank: string }
